@@ -9,15 +9,22 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "cross-spawn": "^7.0.6",
+    "got": "^14.4.6",
+    "gsap": "^3.12.7",
+    "load-bmfont": "^1.4.2",
+    "postcss": "^8.5.2",
     "three": "^0.173.0",
-    "vue": "^3.2.13"
+    "three-bmfont-text": "^3.0.1",
+    "vue": "^3.2.13",
+    "vue-loader": "^17.4.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3"
   },
