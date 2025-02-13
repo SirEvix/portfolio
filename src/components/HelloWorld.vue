@@ -1,7 +1,10 @@
 <template>
   <div class="container">
     <div ref="sceneContainer"></div>
-    <button @click="updateCameraAndTarget1">Recenter 1</button>
+    <div v-if="loading" class="loading-overlay">
+      <img src="/assets/images/lodingGif.gif" class="loading-gif" />
+    </div>
+    <button @click="updateCameraAndTarget1">Portfolio</button>
     <button @click="updateCameraAndTarget2">Recenter 2</button>
     <button @click="updateCameraAndTarget3">Recenter 3</button>
   </div>
@@ -33,10 +36,29 @@ const TEXT_OFFSET_Y = 0.2; // Adjusted line height
 let TARGET_COORDINATES = { x: 0, y: 0, z: 0 };
 let Target1 = { x: 0, y: 4, z: 7.5 }; // Front/Back  -  Up/Down - +Left/-Right
 let CamPos1 = { x: 15, y: 7, z: 7.5 };
-let Target2 = { x: 0, y: 5, z: 7.5 };
-let CamPos2 = { x: 2, y: 7, z: 7.5 };
+let Target2 = { x: 1.2, y: 3, z: -2 };
+let CamPos2 = { x: 3.5, y: 3.3, z: -1.5 };
+
+const models = [
+  '/assets/3dObjects/models/dbl1.glb',
+  '/assets/3dObjects/models/dbl2.glb',
+  '/assets/3dObjects/models/dbl3.glb',
+  '/assets/3dObjects/models/dbl4.glb',
+  '/assets/3dObjects/models/dbl5.glb',
+  '/assets/3dObjects/models/dbl6.glb',
+  '/assets/3dObjects/models/dbl7.glb',
+  '/assets/3dObjects/models/dbl8.glb'
+];
+
+let currentModelIndex = -1;
+let currentModel = null;
 
 export default {
+  data() {
+    return {
+      loading: true,
+    };
+  },
   mounted() {
     this.initThreeJS();
     window.addEventListener('resize', this.onWindowResize);
@@ -50,7 +72,7 @@ export default {
   methods: {
     initThreeJS() {
       const container = this.$refs.sceneContainer;
-      const scene = new THREE.Scene();
+      this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 2000); // Adjust near and far clipping planes
       this.renderer = new THREE.WebGLRenderer();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -63,10 +85,12 @@ export default {
       this.controls.maxPolarAngle = Math.PI / 2;
 
       const loader = new GLTFLoader();
-      loader.load('/assets/3dObjects/cubes_Export_Blend.glb', function (gltf) {
-        scene.add(gltf.scene);
-      }, undefined, function (error) {
+      loader.load('/assets/3dObjects/cubes_Export_Blend.glb', (gltf) => {
+        this.scene.add(gltf.scene);
+        this.loading = false;
+      }, undefined, (error) => {
         console.error('An error happened while loading the 3D model:', error);
+        this.loading = false;
       });
 
       // Add lights
@@ -75,25 +99,25 @@ export default {
       const rectLight = new THREE.RectAreaLight(ConstantColors.o.blue, 50, 4.7, 1.2);
       rectLight.position.set(-0.75, 6.05, 7.56);
       rectLight.lookAt(50, 6.05, 7.56);
-      scene.add(rectLight);
+      this.scene.add(rectLight);
 
       const rectLight1 = new THREE.RectAreaLight(ConstantColors.o.blue, 300, 1.5, 1.5);
       rectLight1.position.set(1.7, 3, -1.6);
       rectLight1.lookAt(50, 6.5, 26);
-      scene.add(rectLight1);
+      this.scene.add(rectLight1);
 
       const rectLight2 = new THREE.RectAreaLight(ConstantColors.o.white, 1, 1.5, 1.5);
       rectLight2.position.set(1.78, 3, -1.6);
       rectLight2.lookAt(-50, -4, -33);
-      scene.add(rectLight2);
+      this.scene.add(rectLight2);
 
       const pointLight = new THREE.PointLight(ConstantColors.o.light, 100, 100);
       pointLight.position.set(6.7, 6, 16.3);
-      scene.add(pointLight);
+      this.scene.add(pointLight);
 
       const pointLight1 = new THREE.PointLight(ConstantColors.o.light, 100, 100);
       pointLight1.position.set(3.8, 6, 11.95);
-      scene.add(pointLight1);
+      this.scene.add(pointLight1);
 
       const rectLight3 = new THREE.RectAreaLight();
       rectLight3.position.set(0, 5, 7.5);
@@ -102,15 +126,15 @@ export default {
       rectLight3.width = 1;
       rectLight3.height = 5;
       rectLight3.color.set(ConstantColors.o.white);
-      scene.add(rectLight3);
+      this.scene.add(rectLight3);
 
       const pointLight3 = new THREE.PointLight(ConstantColors.o.red, 100, 100);
       pointLight3.position.set(-0.5, 9, 5.2);
-      scene.add(pointLight3);
+      this.scene.add(pointLight3);
 
       // Load font and create text geometry
       const fontLoader = new FontLoader();
-      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', function (font) { // Use the bold font
+      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => { // Use the bold font
         TEXTS.forEach((item) => {
           const textGeometry = new TextGeometry(item.text, {
             font: font,
@@ -122,7 +146,7 @@ export default {
           textMesh.position.set(item.position.x, item.position.y + TEXT_OFFSET_Y, item.position.z);
           textMesh.scale.set(TEXT_SCALE.x, TEXT_SCALE.y, TEXT_SCALE.z);
           textMesh.rotation.set(item.rotation.x, item.rotation.y, item.rotation.z);
-          scene.add(textMesh);
+          this.scene.add(textMesh);
 
           // Add reflection with lower opacity
           const reflectionGeometry = new TextGeometry(item.text, {
@@ -141,14 +165,130 @@ export default {
           reflectionMesh.position.set(item.position.x, item.position.y - TEXT_OFFSET_Y, item.position.z);
           reflectionMesh.scale.set(TEXT_SCALE.x, TEXT_SCALE.y, TEXT_SCALE.z);
           reflectionMesh.rotation.set(item.rotation.x, item.rotation.y, item.rotation.z);
-          scene.add(reflectionMesh);
+          this.scene.add(reflectionMesh);
         });
       });
 
+      // add a n arrow pointing up on one side of the button
+      const arrowGeometry = new THREE.ConeGeometry(0.1, 0.28, 4.2);
+      const arrowMaterial = new THREE.MeshBasicMaterial({ color: ConstantColors.o.light });
+      const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+      // Rotate on y axis 45 degrees
+      arrow.rotation.y = Math.PI / 1.3;
+      arrow.position.set(2.22, 3, -2.452 );
+      this.scene.add(arrow);
+
+      //add another arrow under this une on the y axis and rotate it 180 degrees
+      const arrowGeometry1 = new THREE.ConeGeometry(0.1, 0.28, 4.2);
+      const arrowMaterial1 = new THREE.MeshBasicMaterial({ color: ConstantColors.o.light });
+      const arrow1 = new THREE.Mesh(arrowGeometry1, arrowMaterial1);
+      // Rotate on y axis 45 degrees
+      arrow1.rotation.y = Math.PI / 1.6;
+      arrow1.rotation.x = Math.PI;
+      arrow1.position.set(2.25, 2.5, -2.44 );
+      this.scene.add(arrow1);
+
+      arrow1.userData = { direction: 'up' };
+      arrow.userData = { direction: 'down' };
+
+      this.arrows = [arrow, arrow1];
+
+      window.addEventListener('click', this.onDocumentMouseDown, false);
+
+      // __________________________
+
+      // Remove the duplicate fontLoader declaration and reuse the existing one
+      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => {
+        const textGeometry = new TextGeometry('Click the buttons', {
+          font: font,
+          size: 1,
+          depth: 0.2,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.02,
+          bevelOffset: 0,
+          bevelSegments: 5
+        });
+
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+        textMesh.position.set(2.13, 3.5, -2.4);  // Position -->  back/forth --- up/down --- left/right
+
+        textMesh.rotation.x = Math.PI / 0.000001;  // 45 degrees
+        textMesh.rotation.y = Math.PI / 3.05; // 45 degrees
+        textMesh.rotation.z = Math.PI / 0.000001;  // 45 degrees
+
+        textMesh.scale.set(0.022, 0.022, 0.002);  // Scale uniformly
+
+        textMesh.material.color.set(0x000000);  // Change color to green
+
+        this.scene.add(textMesh);
+      });
+
+      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => {
+        const textGeometry1 = new TextGeometry('to scroll', {
+          font: font,
+          size: 1,
+          depth: 0.2,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.02,
+          bevelOffset: 0,
+          bevelSegments: 5
+        });
+
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const textMesh = new THREE.Mesh(textGeometry1, textMaterial);
+
+        textMesh.position.set(2.16, 3.45, -2.44);  // Position -->  back/forth --- up/down --- left/right
+
+        textMesh.rotation.x = Math.PI / 0.000001;  // 45 degrees
+        textMesh.rotation.y = Math.PI / 3.05; // 45 degrees
+        textMesh.rotation.z = Math.PI / 0.000001;  // 45 degrees
+
+        textMesh.scale.set(0.022, 0.022, 0.002);  // Scale uniformly
+
+        textMesh.material.color.set(0x000000);  // Change color to green
+
+        this.scene.add(textMesh);
+      });
+
+      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => {
+        const textGeometry2 = new TextGeometry('through my models', {
+          font: font,
+          size: 1,
+          depth: 0.2,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.02,
+          bevelOffset: 0,
+          bevelSegments: 5
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const textMesh = new THREE.Mesh(textGeometry2, textMaterial);
+
+        textMesh.position.set(2.128, 3.4, -2.39);  // Position -->  back/forth --- up/down --- left/right
+
+        textMesh.rotation.x = Math.PI / 0.000001;  // 45 degrees
+        textMesh.rotation.y = Math.PI / 3.05; // 45 degrees
+        textMesh.rotation.z = Math.PI / 0.000001;  // 45 degrees
+
+        textMesh.scale.set(0.022, 0.022, 0.002);  // Scale uniformly
+
+        textMesh.material.color.set(0x000000);  // Change color to green
+
+        this.scene.add(textMesh);
+      });
+
+      // _________________________________________________________
       // Add a helper at the target coordinates
       this.targetHelper = new THREE.AxesHelper(5);
       this.targetHelper.position.set(TARGET_COORDINATES.x, TARGET_COORDINATES.y, TARGET_COORDINATES.z);
-      scene.add(this.targetHelper);
+      this.scene.add(this.targetHelper);
 
       // Initialize the camera position and lookAt after everything is added to the scene
       this.camera.position.set(10, 10, 20);
@@ -157,10 +297,49 @@ export default {
       const animate = () => {
         requestAnimationFrame(animate);
         this.controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-        this.renderer.render(scene, this.camera);
+        if (currentModel) {
+          currentModel.rotation.y += 0.01; // Spin the model slowly
+        }
+        this.renderer.render(this.scene, this.camera);
       };
 
       animate();
+    },
+    onDocumentMouseDown(event) {
+      event.preventDefault();
+      const mouse = new THREE.Vector2();
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, this.camera);
+
+      const intersects = raycaster.intersectObjects(this.arrows);
+
+      if (intersects.length > 0) {
+        this.scrollModels({ target: intersects[0].object });
+      }
+    },
+    scrollModels(event) {
+      console.log('Arrow clicked:', event.target.userData.direction);
+      const direction = event.target.userData.direction;
+      if (currentModel) {
+        this.scene.remove(currentModel);
+      }
+      this.loading = true;
+      if (direction === 'up') {
+        currentModelIndex = (currentModelIndex + 1) % models.length;
+      } else {
+        currentModelIndex = (currentModelIndex - 1 + models.length) % models.length;
+      }
+      const loader = new GLTFLoader();
+      loader.load(models[currentModelIndex], (gltf) => {
+        currentModel = gltf.scene;
+        currentModel.position.set(2.1, 2.7, -1.5);
+        currentModel.scale.set(0.2, 0.2, 0.2);
+        this.scene.add(currentModel);
+        this.loading = false;
+      });
     },
     updateCameraAndTarget1() {
       this.updateCameraAndTarget(Target1, CamPos1);
@@ -227,9 +406,12 @@ html, body, .container {
 }
 button {
   position: absolute;
-  top: 10px;
+  top: 15px;
   left: 10px;
   z-index: 10;
+  padding: 15px;
+  border-radius: 10px;
+  background: #0000FF; /* Replace with the actual color value from ConstantColors.o.blue */
 }
 button:nth-child(2) {
   left: 100px;
@@ -238,6 +420,21 @@ button:nth-child(3) {
   left: 200px;
 }
 button:nth-child(4) {
-  left: 300px;
+  left: 310px;
+}
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.781); /* Darker filter */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+.loading-gif {
+  z-index: 21;
 }
 </style>
