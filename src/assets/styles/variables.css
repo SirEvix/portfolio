@@ -1,0 +1,15 @@
+:root {
+  --black: #26091C; /* ConstantColors.o.black */
+  --dark: #380E73; /* ConstantColors.o.dark */
+  --purple: #8C15BF; /* ConstantColors.o.purple */
+  --light: #B21DF2; /* ConstantColors.o.light */
+  --blue: #4B1DF2; /* ConstantColors.o.blue */
+  --red: #F21D1D; /* ConstantColors.o.red */
+  --white: #FFFFFF; /* ConstantColors.o.white */
+  --gray: #B2C1D2; /* ConstantColors.i.gray */
+  --darkgray: #8494A7; /* ConstantColors.i.darkgray */
+  --lightblue: #ACD1FC; /* ConstantColors.i.lightblue */
+  --grayblue: #4D647D; /* ConstantColors.i.grayblue */
+  --darkblue: #253A52; /* ConstantColors.i.darkblue */
+  --dBlue: #0F2033; /* ConstantColors.i.dBlue */
+}

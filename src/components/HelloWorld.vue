@@ -2,7 +2,7 @@
   <div class="container">
     <div ref="sceneContainer"></div>
     <div v-if="loading" class="loading-overlay">
-      <img src="/assets/images/lodingGif.gif" class="loading-gif" />
+      <img src="/assets/imag/lodingGif.gif" class="loading-gif" />
     </div>
     <button @click="updateCameraAndTarget1">Portfolio</button>
     <button @click="updateCameraAndTarget2">Recenter 2</button>
@@ -34,8 +34,8 @@ const TEXT_SCALE = { x: 1, y: 1, z: 0.0001 };
 const TEXT_OFFSET_Y = 0.2; // Adjusted line height
 
 let TARGET_COORDINATES = { x: 0, y: 0, z: 0 };
-let Target1 = { x: 0, y: 4, z: 7.5 }; // Front/Back  -  Up/Down - +Left/-Right
-let CamPos1 = { x: 15, y: 7, z: 7.5 };
+let Target1 = { x: -2, y: 3.6, z: 7.5 }; // Front/Back  -  Up/Down - +Left/-Right
+let CamPos1 = { x: 0.5, y: 2, z: 7.5 };
 let Target2 = { x: 1.2, y: 3, z: -2 };
 let CamPos2 = { x: 3.5, y: 3.3, z: -1.5 };
 
@@ -60,6 +60,7 @@ export default {
     };
   },
   mounted() {
+    console.log('HelloWorld.vue mounted'); // Log to verify mounting
     this.initThreeJS();
     window.addEventListener('resize', this.onWindowResize);
   },
@@ -342,7 +343,11 @@ export default {
       });
     },
     updateCameraAndTarget1() {
-      this.updateCameraAndTarget(Target1, CamPos1);
+      this.updateCameraAndTarget(Target1, CamPos1, () => {
+        setTimeout(() => {
+          this.$router.push({ name: 'HomePage' });
+        }, 500); // 0.5 second delay
+      });
     },
     updateCameraAndTarget2() {
       this.updateCameraAndTarget(Target2, CamPos2);
@@ -350,7 +355,7 @@ export default {
     updateCameraAndTarget3() {
       this.updateCameraAndTarget(TARGET_COORDINATES, { x: 10, y: 10, z: 20 });
     },
-    updateCameraAndTarget(target, camPos) {
+    updateCameraAndTarget(target, camPos, callback) {
       TARGET_COORDINATES = target;
       this.targetHelper.position.set(TARGET_COORDINATES.x, TARGET_COORDINATES.y, TARGET_COORDINATES.z);
 
@@ -362,7 +367,8 @@ export default {
         duration: 2,
         onUpdate: () => {
           this.controls.update();
-        }
+        },
+        onComplete: callback
       });
 
       // Animate camera position
@@ -375,6 +381,9 @@ export default {
           this.camera.lookAt(new THREE.Vector3(TARGET_COORDINATES.x, TARGET_COORDINATES.y, TARGET_COORDINATES.z));
         }
       });
+    },
+    navigateToHome() {
+      this.$router.push({ name: 'HomePage' });
     },
     onWindowResize() {
       const camera = this.camera;
@@ -412,15 +421,18 @@ button {
   padding: 15px;
   border-radius: 10px;
   background: #0000FF; /* Replace with the actual color value from ConstantColors.o.blue */
+  color: aliceblue;
+  font-size: 16px;
+  font-weight: bold;
 }
 button:nth-child(2) {
   left: 100px;
 }
 button:nth-child(3) {
-  left: 200px;
+  left: 210px;
 }
 button:nth-child(4) {
-  left: 310px;
+  left: 335px;
 }
 .loading-overlay {
   position: absolute;
