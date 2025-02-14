@@ -1,3 +1,99 @@
-body {
+.page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    height: 100vh; /* Full height of the viewport */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
 
+.page-element {
+    border-radius: 20px;
+    background: var(--gray);
+    box-shadow: 0px 10px 0px 0px var(--DarkGray, #8494A7);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 90%;
+    padding: 0 60px;
+    margin: 30px 0;
+}
+
+.titles {
+    color: var(--Black);
+    font-family: "Times New Roman";
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.boxContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+.subtitle {
+    color: var(--Black);
+    font-family: "Bebas Neue";
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.desc {
+    color: var(--Black, #26091C);
+    font-family: "PT Sans Narrow";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 413px;
+}
+.videoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin: 50px 0;
+}
+
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.lightbox-content img {
+  width: 100%;
+  height: auto;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
 }

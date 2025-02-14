@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <Header :pageName="$route.name" />
+  <div class="page-container">
+        <Header :pageName="$route.name" />
     <h1>Video Page</h1>
   </div>
 </template>
@@ -16,5 +16,5 @@ export default {
 </script>
 
 <style scoped>
-/* Add your styles here */
+@import '@/assets/styles/global.scss';
 </style>

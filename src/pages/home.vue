@@ -3,9 +3,9 @@
     <Header :pageName="$route.name" /> <!-- Pass the current route name as a prop -->
     <h1>Welcome to My Portfolio</h1>
     <div class="thumbnails-container">
-      <div class="thumbnail" v-for="section in sections" :key="section.name">
+      <div class="thumbnail" v-for="section in sections" :key="section.name" @click="navigateTo(section.name)">
         <img :src="section.image" :alt="section.name" />
-        <p>{{ section.name }}</p>
+        <p @click.stop="navigateTo(section.name)">{{ section.name }}</p>
       </div>
     </div>
   </div>
@@ -21,16 +21,18 @@ export default {
   data() {
     return {
       sections: [
-        { name: '3D', image: '/assets/images/th3dgif' },
-        { name: 'Development', image: '@/assets/images/thdev.gif' },
-        { name: 'Photography', image: '@/assets/images/thph.png' },
-        { name: 'Video', image: '@/assets/images/thvid.gif' },
-        { name: 'Graphic Design', image: '@/assets/images/thgd.png' }
+        { name: '3D', image: require('@/assets/images/th3d.gif') },
+        { name: 'Development', image: require('@/assets/images/thdev.gif') },
+        { name: 'Photography', image: require('@/assets/images/thph.jpg') },
+        { name: 'Video', image: require('@/assets/images/thvid.gif') },
+        { name: 'GraphicDesign', image: require('@/assets/images/thgd.png') } // Ensure this matches the route name
       ]
     };
   },
   methods: {
-
+    navigateTo(sectionName) {
+      this.$router.push({ name: sectionName });
+    }
   }
 }
 </script>
@@ -56,6 +58,11 @@ export default {
   overflow: hidden;
   text-align: center;
   margin: 10px;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+.thumbnail:hover {
+  transform: scale(1.1);
 }
 .thumbnail img {
   width: 100%;

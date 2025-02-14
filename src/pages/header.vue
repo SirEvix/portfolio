@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="home-header" @mouseover="showButtons = true" @mouseleave="showButtons = false">
+    <header class="home-header" @mouseenter="expandHeader" @mouseleave="collapseHeader" @transitionend="onTransitionEnd">
       <div class="buttons-left" v-if="showButtons">
         <button @click="navigateTo('3D')">3D</button>
         <button @click="navigateTo('Development')">Development</button>
@@ -31,10 +31,34 @@ export default {
   },
   data() {
     return {
-      showButtons: false
+      showButtons: false,
+      headerExpanded: false,
+      timeoutId: null
     };
   },
   methods: {
+    expandHeader() {
+      clearTimeout(this.timeoutId);
+      this.headerExpanded = true;
+      setTimeout(() => {
+        this.showButtons = true;
+      }, 800); // Match the transition duration
+    },
+    collapseHeader() {
+      if (this.showButtons) {
+        this.showButtons = false;
+        this.timeoutId = setTimeout(() => {
+          this.headerExpanded = false;
+        }, 200); // Delay to ensure smooth transition
+      } else {
+        this.headerExpanded = false;
+      }
+    },
+    onTransitionEnd() {
+      if (!this.headerExpanded) {
+        this.showButtons = false;
+      }
+    },
     navigateTo(page) {
       this.$router.push({ name: page });
     },
@@ -71,6 +95,9 @@ export default {
   position: relative;
   transition: all 0.8s ease;
   &:hover {
+    width: 900px;
+  }
+  &.expanded {
     width: 900px;
   }
 }

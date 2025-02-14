@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="page-container">
     <Header :pageName="$route.name" />
     <h1>Development Page</h1>
   </div>
@@ -15,6 +15,7 @@ export default {
 }
 </script>
 
-<style scoped>
-/* Add your styles here */
+<style scoped lang="scss">
+@import '../assets/styles/global.scss';
+
 </style>
