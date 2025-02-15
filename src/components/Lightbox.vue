@@ -1,7 +1,7 @@
 <template>
   <div class="lightbox" @click="close">
     <div class="lightbox-content" @click.stop>
-      <img :src="image" alt="Lightbox Image" />
+      <img :src="require(`@/assets/images/${image.split('/').pop()}`)" alt="Lightbox Image" />
       <button class="close-btn" @click="close">Close</button>
     </div>
   </div>

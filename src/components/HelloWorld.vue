@@ -2,7 +2,7 @@
   <div class="container">
     <div ref="sceneContainer"></div>
     <div v-if="loading" class="loading-overlay">
-      <img src="/assets/imag/lodingGif.gif" class="loading-gif" />
+      <img :src="loadingGif" alt="Loading..." />
     </div>
     <button @click="updateCameraAndTarget1">Portfolio</button>
     <button @click="updateCameraAndTarget2">Recenter 2</button>
@@ -19,6 +19,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { gsap } from 'gsap';
 import ConstantColors from '../constants/constantcolors';
+import loadingGif from '../../src/assets/images/lodingGif.gif';
 
 // Text properties
 const TEXTS = [
@@ -57,6 +58,7 @@ export default {
   data() {
     return {
       loading: true,
+      loadingGif,
     };
   },
   mounted() {
@@ -135,7 +137,7 @@ export default {
 
       // Load font and create text geometry
       const fontLoader = new FontLoader();
-      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => { // Use the bold font
+      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => { // Use the bold font
         TEXTS.forEach((item) => {
           const textGeometry = new TextGeometry(item.text, {
             font: font,
@@ -199,7 +201,7 @@ export default {
       // __________________________
 
       // Remove the duplicate fontLoader declaration and reuse the existing one
-      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => {
+      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => {
         const textGeometry = new TextGeometry('Click the buttons', {
           font: font,
           size: 1,
@@ -228,7 +230,7 @@ export default {
         this.scene.add(textMesh);
       });
 
-      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => {
+      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => {
         const textGeometry1 = new TextGeometry('to scroll', {
           font: font,
           size: 1,
@@ -257,7 +259,7 @@ export default {
         this.scene.add(textMesh);
       });
 
-      fontLoader.load('/assets/fonts/Times New Roman Cyr_Bold.json', (font) => {
+      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => {
         const textGeometry2 = new TextGeometry('through my models', {
           font: font,
           size: 1,
