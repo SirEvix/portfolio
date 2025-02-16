@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build": "npm run clean && vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "core-js": "^3.8.3",
@@ -29,7 +30,8 @@
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "node-sass": "^9.0.0",
-    "sass-loader": "^16.0.4"
+    "sass-loader": "^16.0.4",
+    "rimraf": "^3.0.2"
   },
   "eslintConfig": {
     "root": true,

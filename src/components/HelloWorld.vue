@@ -5,8 +5,8 @@
       <img :src="loadingGif" alt="Loading..." />
     </div>
     <button @click="updateCameraAndTarget1">Portfolio</button>
-    <button @click="updateCameraAndTarget2">Recenter 2</button>
-    <button @click="updateCameraAndTarget3">Recenter 3</button>
+    <button @click="updateCameraAndTarget2">3D Objects</button>
+    <button @click="updateCameraAndTarget3">Recenter</button>
   </div>
 </template>
 
@@ -40,6 +40,8 @@ let Target1 = { x: -2, y: 3.6, z: 7.5 }; // Front/Back  -  Up/Down - +Left/-Righ
 let CamPos1 = { x: 0.5, y: 2, z: 7.5 };
 let Target2 = { x: 1.2, y: 3, z: -2 };
 let CamPos2 = { x: 3.5, y: 3.3, z: -1.5 };
+let Target3 = { x: 6, y: 2, z: 8 }; // Recenter target coordinates
+let CamPos3 = { x: 10, y: 8, z: 10 }; // Recenter camera position
 
 const models = [
   '../assets/3dObjects/models/dbl1.glb',
@@ -54,6 +56,7 @@ const models = [
 
 let currentModelIndex = -1;
 let currentModel = null;
+let targetHelperVisible = false; // Variable to control the visibility of the target helper
 
 export default {
   data() {
@@ -292,6 +295,7 @@ export default {
       // Add a helper at the target coordinates
       this.targetHelper = new THREE.AxesHelper(5);
       this.targetHelper.position.set(TARGET_COORDINATES.x, TARGET_COORDINATES.y, TARGET_COORDINATES.z);
+      this.targetHelper.visible = targetHelperVisible; // Set visibility based on the variable
       this.scene.add(this.targetHelper);
 
       // Initialize the camera position and lookAt after everything is added to the scene
@@ -356,7 +360,7 @@ export default {
       this.updateCameraAndTarget(Target2, CamPos2);
     },
     updateCameraAndTarget3() {
-      this.updateCameraAndTarget(TARGET_COORDINATES, { x: 10, y: 10, z: 20 });
+      this.updateCameraAndTarget(Target3, CamPos3);
     },
     updateCameraAndTarget(target, camPos, callback) {
       TARGET_COORDINATES = target;
