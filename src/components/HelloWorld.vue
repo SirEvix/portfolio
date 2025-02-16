@@ -19,7 +19,8 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { gsap } from 'gsap';
 import ConstantColors from '../constants/constantcolors';
-import loadingGif from '../../src/assets/images/lodingGif.gif';
+import loadingGif from '../assets/images/loadingGif.gif'; // Ensure the path is correct
+const fontUrl = '/assets/fonts/TimesNewRomanCyrBold.json'; // Use absolute path for public assets
 
 // Text properties
 const TEXTS = [
@@ -41,14 +42,14 @@ let Target2 = { x: 1.2, y: 3, z: -2 };
 let CamPos2 = { x: 3.5, y: 3.3, z: -1.5 };
 
 const models = [
-  '/assets/3dObjects/models/dbl1.glb',
-  '/assets/3dObjects/models/dbl2.glb',
-  '/assets/3dObjects/models/dbl3.glb',
-  '/assets/3dObjects/models/dbl4.glb',
-  '/assets/3dObjects/models/dbl5.glb',
-  '/assets/3dObjects/models/dbl6.glb',
-  '/assets/3dObjects/models/dbl7.glb',
-  '/assets/3dObjects/models/dbl8.glb'
+  '../assets/3dObjects/models/dbl1.glb',
+  '../assets/3dObjects/models/dbl2.glb',
+  '../assets/3dObjects/models/dbl3.glb',
+  '../assets/3dObjects/models/dbl4.glb',
+  '../assets/3dObjects/models/dbl5.glb',
+  '../assets/3dObjects/models/dbl6.glb',
+  '../assets/3dObjects/models/dbl7.glb',
+  '../assets/3dObjects/models/dbl8.glb'
 ];
 
 let currentModelIndex = -1;
@@ -137,7 +138,7 @@ export default {
 
       // Load font and create text geometry
       const fontLoader = new FontLoader();
-      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => { // Use the bold font
+      fontLoader.load(fontUrl, (font) => { // Use the correct path for the font
         TEXTS.forEach((item) => {
           const textGeometry = new TextGeometry(item.text, {
             font: font,
@@ -201,7 +202,7 @@ export default {
       // __________________________
 
       // Remove the duplicate fontLoader declaration and reuse the existing one
-      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => {
+      fontLoader.load(fontUrl, (font) => {
         const textGeometry = new TextGeometry('Click the buttons', {
           font: font,
           size: 1,
@@ -230,7 +231,7 @@ export default {
         this.scene.add(textMesh);
       });
 
-      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => {
+      fontLoader.load(fontUrl, (font) => {
         const textGeometry1 = new TextGeometry('to scroll', {
           font: font,
           size: 1,
@@ -259,7 +260,7 @@ export default {
         this.scene.add(textMesh);
       });
 
-      fontLoader.load('/assets/fonts/TimesNewRomanCyrBold.json', (font) => {
+      fontLoader.load(fontUrl, (font) => {
         const textGeometry2 = new TextGeometry('through my models', {
           font: font,
           size: 1,

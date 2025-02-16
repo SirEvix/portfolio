@@ -40,13 +40,15 @@ export default {
 
 .lightbox-content {
   position: relative;
-  max-width: 90%;
-  max-height: 90%;
+  max-width: 60%; 
+  max-height: 100vh;
 }
 
 .lightbox-content img {
   width: 100%;
   height: auto;
+  max-width: 100%;
+  max-height: 95vh;
 }
 
 .close-btn {

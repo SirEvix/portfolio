@@ -1,9 +1,7 @@
 <template>
   <div class="page-container">
     <Header :pageName="$route.name" />
-    <h1>Graphic Design Page</h1>
     <div class="page-element">
-      <h2 class="titles">Magazine</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Magazine</h3>
@@ -13,7 +11,6 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Fires de Sant Narcis</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Fires de Sant Narcis</h3>
@@ -23,7 +20,6 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Attack On Titan Map</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Attack On Titan Map</h3>
@@ -33,7 +29,6 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Curling</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Curling</h3>
@@ -43,7 +38,6 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Self Illustrated Portrait</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Self Illustrated Portrait</h3>
@@ -53,7 +47,6 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Abstract Shapes</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Abstract Shapes</h3>
@@ -63,7 +56,6 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Vanguard Entertainment</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Vanguard Entertainment</h3>
