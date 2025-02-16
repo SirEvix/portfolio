@@ -99,13 +99,51 @@ export default {
 
 <style scoped lang="scss">
 @import '../assets/styles/global.scss';
+
 .forgeImage {
   height: 80vh;
   margin-top: 20px;
   align-self: center;
   cursor: pointer;
 }
+
 .desc {
   margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 10px;
+  }
+
+  .titles {
+    font-size: 1.5em;
+  }
+
+  .boxContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .infoBox {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .forgeImage {
+    width: 100%;
+    height: auto;
+  }
+
+  .desc {
+    width: 100%;
+    font-size: 14px;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+
+  .page-element {
+    padding: 10px;
+  }
 }
 </style>

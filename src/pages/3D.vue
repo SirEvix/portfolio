@@ -142,21 +142,59 @@ export default {
 
 <style scoped lang="scss">
 @import '../assets/styles/global.scss';
+
 .forgeImage {
   width: 80%;
   margin-top: 20px;
   align-self: center;
   cursor: pointer;
 }
+
 .descr {
-    color: var(--Black, #26091C);
-    font-family: "PT Sans Narrow";
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    width: 50%;
-    align-self: center;
-    margin-top: 30px;
+  color: var(--Black, #26091C);
+  font-family: "PT Sans Narrow";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  width: 50%;
+  align-self: center;
+  margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 10px;
+  }
+
+  .titles {
+    font-size: 1.5em;
+  }
+
+  .boxContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .infoBox {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .videoContainer iframe {
+    width: 100%;
+    height: auto;
+  }
+
+  .forgeImage {
+    width: 100%;
+  }
+
+  .desc, .descr {
+    width: 100%;
+    font-size: 14px;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
 }
 </style>

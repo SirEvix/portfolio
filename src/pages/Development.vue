@@ -156,4 +156,47 @@ export default {
   flex-wrap: wrap; /* Allow wrapping if necessary */
   width: 100%;
 }
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 10px;
+  }
+
+  .titles {
+    font-size: 1.5em;
+  }
+
+  .boxContainer, .boxContainer2 {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .infoBox, .infoBox2 {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .brandingImage, .brandingImage1, .brandingImage2, .brandingImage3 {
+    width: 100%;
+    height: auto;
+  }
+
+  .desc, .desc2 {
+    width: 100%;
+    font-size: 14px;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+
+  .galleryContainer, .galleryContainer2 {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .galleryContainer2 .brandingImage2 {
+    width: 100%;
+    height: 100vh;
+    object-fit: contain;
+  }
+}
 </style>

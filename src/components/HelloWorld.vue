@@ -456,4 +456,26 @@ button:nth-child(4) {
 .loading-gif {
   z-index: 21;
 }
+
+@media (max-width: 768px) {
+  html, body, .container {
+    height: 100vh;
+  }
+  button {
+    left: 5px;
+    top: 10px;
+  }
+  button:nth-child(2) {
+    left: 5px;
+    top: 10px;
+  }
+  button:nth-child(3) {
+    left: 5px;
+    top: 80px;
+  }
+  button:nth-child(4) {
+    left: 5px;
+    top: 150px;
+  }
+}
 </style>

@@ -100,6 +100,18 @@ export default {
   &.expanded {
     width: 900px;
   }
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    &:hover {
+      height: auto;
+    }
+    &.expanded {
+      height: auto;
+    }
+  }
 }
 .center-content {
   display: flex;
@@ -108,6 +120,11 @@ export default {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  @media (max-width: 768px) {
+    position: static;
+    transform: none;
+    margin-bottom: 20px;
+  }
 }
 .logo {
   width: 50px;
@@ -120,12 +137,26 @@ export default {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  @media (max-width: 768px) {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+  }
 }
 .buttons-left {
   left: 10px;
+  @media (max-width: 768px) {
+    margin-bottom: 10px;
+  }
 }
 .buttons-right {
   right: 10px;
+  @media (max-width: 768px) {
+    margin-top: 10px;
+  }
 }
 .buttons-left button, .buttons-right button {
   margin: 10px;
@@ -139,6 +170,10 @@ export default {
   &:hover {
     background-color: var(--darkgray);
     transition: all 0.6s ease;
+  }
+  @media (max-width: 768px) {
+    width: calc(100% - 20px);
+    margin: 5px 0;
   }
 }
 </style>

@@ -182,4 +182,35 @@ export default {
     height: 100%;
     margin: 10px 0 60px 0;
 }
+
+@media (max-width: 768px) {
+    .page-container {
+        padding: 10px;
+    }
+
+    .titles {
+        font-size: 1.5em;
+    }
+
+    .video-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .desc {
+        width: 100%;
+        font-size: 14px;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    .page-element {
+        padding: 10px;
+    }
+
+    .videoContainer iframe {
+        width: 100%;
+        height: auto;
+    }
+}
 </style>

@@ -74,4 +74,11 @@ export default {
   font-size: 16px;
   color: #333;
 }
+
+@media (max-width: 600px) {
+  .home-container {
+    height: 100%; /* Full height of the viewport */
+    overflow-y: auto; /* Enable vertical scroll */
+  }
+}
 </style>
