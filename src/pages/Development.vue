@@ -6,7 +6,12 @@
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Description</h3>
-          <p class="desc">For this project, we worked as a team of three. My colleagues focused on the design aspect, using Figma to create the visual elements and user interface. I was responsible for all the programming, utilizing React Native and JavaScript to bring our designs to life. You can check out their work and follow them on Instagram: Colleague 1's Instagram and Colleague 2's Instagram. It was a collaborative effort that combined our strengths to produce a seamless and visually appealing app.</p>
+          <p class="desc">
+            For this project, we worked as a team of three. My colleagues focused on the design aspect, using Figma to create the visual elements and user interface. I was responsible for all the programming, utilizing React Native and JavaScript to bring our designs to life. You can check out their work and follow them on Instagram: 
+            <button @click="openInstagram('https://www.instagram.com/claralls3105/')">Colleague 1's Instagram</button> and 
+            <button @click="openInstagram('https://www.instagram.com/aleixfibla28/')">Colleague 2's Instagram</button>. 
+            It was a collaborative effort that combined our strengths to produce a seamless and visually appealing app.
+          </p>
         </div>
         <div class="infoBox">
           <h3 class="subtitle">Objective</h3>
@@ -77,6 +82,15 @@ export default {
   name: 'DevelopmentPage',
   components: {
     Header
+  },
+  methods: {
+    openInstagram(url) {
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        window.location.href = url;
+      } else {
+        window.open(url, '_blank');
+      }
+    }
   }
 }
 </script>
@@ -155,6 +169,21 @@ export default {
   flex-direction: row; /* Ensure infoBoxes are in the same row */
   flex-wrap: wrap; /* Allow wrapping if necessary */
   width: 100%;
+}
+
+.desc button {
+  background-color: #3897f0;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.desc button:hover {
+  background-color: #287dc1;
 }
 
 @media (max-width: 768px) {

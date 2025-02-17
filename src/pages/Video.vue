@@ -3,6 +3,32 @@
     <Header :pageName="$route.name" />
     <div class="page-element">
       <div class="video-grid">
+        <div class="videoContainer">
+          <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DQhpeGP97pM?si=mwJSEgYT_VHvy4li" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <div>
+          <h2 class="titles">Abduction (Starship Delta Part 2)
+            <button class="header-button" @click="$router.push('/3D')">Go to 3D Page</button>
+          </h2>
+          <div class="boxContainer">
+            <div class="infoBox">
+              <h3 class="subtitle">Story & Plot</h3>
+              <p class="desc">After receiving their mission, the spaceship travels to Earth. This VFX video showcases a 3D element integrated into the real-world environment, highlighting the abduction process. The protagonist is substituted with a 3D object to create the illusion of being abducted into the spaceship.</p>
+            </div>
+            <div class="infoBox">
+              <h3 class="subtitle">Techniques & Process</h3>
+              <p class="desc">The background was tracked in Blender to integrate the 3D elements seamlessly. Afterward, the elements were moved to After Effects to add effects such as the ring of warped-space created when the spaceship enters the atmosphere. The integration of 3D elements with real-world footage was meticulously handled to ensure realism.</p>
+            </div>
+            <div class="infoBox">
+              <h3 class="subtitle">Sound Design</h3>
+              <p class="desc">Premiere Pro was used for sound design, adding elements like spaceship sounds, sirens, and distant chaos to enhance the atmosphere. The sound design aimed to create an immersive experience, complementing the visual effects and reinforcing the narrative of the abduction.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-element">
+      <div class="video-grid">
         <div>
           <h2 class="titles">Multilayers</h2>
           <p class="desc">This is a video where we tested adding Multilayers of videos in one creating this effects of object appearing and disappearing from the scene or even changing places and appearing in different place.</p>
@@ -161,6 +187,9 @@ export default {
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .desc {
@@ -183,6 +212,17 @@ export default {
     margin: 10px 0 60px 0;
 }
 
+.header-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
 @media (max-width: 768px) {
     .page-container {
         padding: 10px;
@@ -190,6 +230,8 @@ export default {
 
     .titles {
         font-size: 1.5em;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .video-grid {
@@ -211,6 +253,11 @@ export default {
     .videoContainer iframe {
         width: 100%;
         height: auto;
+    }
+
+    .header-button {
+        margin-left: 0;
+        margin-top: 10px;
     }
 }
 </style>

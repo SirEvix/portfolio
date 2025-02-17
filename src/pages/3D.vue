@@ -36,7 +36,7 @@
       </div>
     </div>
     <div class="page-element">
-      <h2 class="titles">Starship Delta</h2>
+      <h2 class="titles">Starship Delta (pt1)</h2>
       <div class="boxContainer">
         <div class="infoBox">
           <h3 class="subtitle">Voice-over</h3>
@@ -67,6 +67,26 @@
           <h3 class="subtitle">Reflection</h3>
           <p class="desc">This animation was an exercise in demonstrating the hidden intricacies of space maneuvers. The contrast between the AI's dialogue and the visual complexity aimed to provoke thought about how much we overlook the sophistication of technology in our everyday lives.</p>
         </div>
+      </div>
+    </div>
+    <div class="page-element">
+      <h2 class="titles">Abduction (Starship Delta pt - 2)</h2>
+      <div class="boxContainer">
+        <div class="infoBox">
+          <h3 class="subtitle">Story & Plot</h3>
+          <p class="desc">After receiving their mission, the spaceship travels to Earth. This VFX video showcases a 3D element integrated into the real-world environment, highlighting the abduction process. The protagonist is substituted with a 3D object to create the illusion of being abducted into the spaceship.</p>
+        </div>
+        <div class="infoBox">
+          <h3 class="subtitle">Techniques & Process</h3>
+          <p class="desc">The background was tracked in Blender to integrate the 3D elements seamlessly. Afterward, the elements were moved to After Effects to add effects such as the ring of warped-space created when the spaceship enters the atmosphere. The integration of 3D elements with real-world footage was meticulously handled to ensure realism.</p>
+        </div>
+        <div class="infoBox">
+          <h3 class="subtitle">Sound Design</h3>
+          <p class="desc">Premiere Pro was used for sound design, adding elements like spaceship sounds, sirens, and distant chaos to enhance the atmosphere. The sound design aimed to create an immersive experience, complementing the visual effects and reinforcing the narrative of the abduction.</p>
+        </div>
+      </div>
+      <div class="videoContainer">
+        <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DQhpeGP97pM?si=mwJSEgYT_VHvy4li" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
     </div>
     <div class="page-element">
