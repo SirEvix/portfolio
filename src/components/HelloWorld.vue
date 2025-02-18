@@ -1,5 +1,14 @@
 <template>
   <div class="container">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1016336595"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-1016336595');
+    </script>
     <div ref="sceneContainer"></div>
     <div v-if="loading" class="loading-overlay">
       <img :src="loadingGif" alt="Loading..." />

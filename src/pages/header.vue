@@ -1,5 +1,14 @@
 <template>
   <div>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1016336595"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-1016336595');
+    </script>
     <header class="home-header" @mouseenter="expandHeader" @mouseleave="collapseHeader" @transitionend="onTransitionEnd">
       <div class="buttons-left" v-if="showButtons">
         <button @click="navigateTo('3D')">3D</button>
