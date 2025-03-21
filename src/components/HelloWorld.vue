@@ -1,14 +1,6 @@
 <template>
   <div class="container">
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1016336595"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'AW-1016336595');
-    </script>
     <div ref="sceneContainer"></div>
     <div v-if="loading" class="loading-overlay">
       <img :src="loadingGif" alt="Loading..." />
@@ -78,6 +70,20 @@ export default {
     console.log('HelloWorld.vue mounted'); // Log to verify mounting
     this.initThreeJS();
     window.addEventListener('resize', this.onWindowResize);
+
+    const script1 = document.createElement('script');
+    script1.async = true;
+    script1.src = 'https://www.googletagmanager.com/gtag/js?id=AW-1016336595';
+    document.head.appendChild(script1);
+
+    const script2 = document.createElement('script');
+    script2.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-1016336595');
+    `;
+    document.head.appendChild(script2);
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.onWindowResize);

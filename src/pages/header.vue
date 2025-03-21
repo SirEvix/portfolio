@@ -1,14 +1,7 @@
 <template>
   <div>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1016336595"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'AW-1016336595');
-    </script>
+    <!-- Removed <script> tags from here -->
     <header class="home-header" @mouseenter="expandHeader" @mouseleave="collapseHeader" @transitionend="onTransitionEnd">
       <div class="buttons-left" v-if="showButtons">
         <button @click="navigateTo('3D')">3D</button>
@@ -86,6 +79,21 @@ export default {
   beforeRouteUpdate(to, from, next) {
     console.log(`_Layout says - route: ${to.path}`);
     next();
+  },
+  mounted() {
+    const script1 = document.createElement('script');
+    script1.async = true;
+    script1.src = 'https://www.googletagmanager.com/gtag/js?id=AW-1016336595';
+    document.head.appendChild(script1);
+
+    const script2 = document.createElement('script');
+    script2.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-1016336595');
+    `;
+    document.head.appendChild(script2);
   }
 }
 </script>
