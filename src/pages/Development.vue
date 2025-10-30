@@ -73,6 +73,14 @@
         <img class="brandingImage2" src="@/assets/images/dev6.gif" alt="Development GIF 6">
       </div>
     </div>
+    <div class="page-element">
+      <h2 class="titles">Other apps</h2>
+      <p class="desc">BoxDrop — an Android ability game I created. Below is a link to the app's privacy policy required by the Play Store so users can read about data handling and disclosures.</p>
+      <div style="margin: 20px 0;">
+        <!-- Try a relative/static path first. If you serve the privacy.html from public or static hosting it should be available at /Outside/BoxDrop/privacy.html -->
+        <button class="boxdrop-btn" @click="openBoxDrop">BoxDrop</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -89,6 +97,19 @@ export default {
         window.location.href = url;
       } else {
         window.open(url, '_blank');
+      }
+    }
+    ,
+    openBoxDrop() {
+      // Try to open the privacy page as a static relative path first (preferred for hosting).
+      // If you later move the privacy.html into /public/Outside/BoxDrop/privacy.html this will open it.
+      const relative = '/Outside/BoxDrop/privacy.html';
+      try {
+        window.open(relative, '_blank');
+      } catch (e) {
+        // Fallback to a local file path for local development (may be blocked by browser depending on settings)
+        const localPath = 'file:///C:/Users/sirev/Documents/GitHub/portfolio/src/pages/Outside/BoxDrop/privacy.html';
+        window.open(localPath, '_blank');
       }
     }
   }
@@ -184,6 +205,21 @@ export default {
 
 .desc button:hover {
   background-color: #287dc1;
+}
+
+.boxdrop-btn {
+  background-color: var(--purple, #8C15BF);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.boxdrop-btn:hover {
+  filter: brightness(0.95);
 }
 
 @media (max-width: 768px) {
