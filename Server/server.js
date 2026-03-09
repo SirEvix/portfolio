@@ -26,6 +26,18 @@ const PORT = process.env.PORT || 4000;
 
 app.use(bodyParser());
 
+// Simple CORS middleware to allow browser requests from the frontend host(s).
+// In production you can restrict the origin via an env var if needed.
+app.use((req, res, next) => {
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-key, x-api-key, Authorization');
+  // allow preflight
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // Admin key (set this in your environment): process.env.ADMIN_KEY
 const ADMIN_KEY = process.env.ADMIN_KEY || '';
 
