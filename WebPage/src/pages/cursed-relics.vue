@@ -189,9 +189,9 @@ export default {
       adminSuccess: null,
     }
   },
-  mounted() {
-    // Prefer authoritative server state: try /api/relics, then fallback to bundled assets, then generated mock
-    fetch('/api/relics').then(r => r.json()).then(data => { this.relics = data }).catch(() => {
+    mounted() {
+    // Prefer authoritative server state: try /api/relics on configured API base, then fallback to bundled assets, then generated mock
+    fetch(this.fullApi('/api/relics')).then(r => r.json()).then(data => { this.relics = data }).catch(() => {
       return fetch('/assets/relics.json').then(r => r.json()).then(data => { this.relics = data }).catch(()=>{ this.relics = Array.from({ length: 500 }, (_, i) => ({ id: i+1, status: 'Dormant' })) })
     }).finally(() => {
       // auto-verify token in URL
@@ -243,11 +243,23 @@ export default {
     } catch(e) { /* noop */ }
   },
   methods: {
-    apiBase() { return '' }, // same-origin API (dev proxy should forward to server)
+    apiBase() {
+      // Prefer explicit build-time env var, otherwise default to your Render backend
+      try {
+        const envBase = process.env.VUE_APP_API_BASE
+        if (envBase && envBase.length) return envBase.replace(/\/$/, '')
+      } catch (e) {}
+      return 'https://relic-backend.onrender.com'
+    }, // configured API base
+    fullApi(path) {
+      // path should start with '/'
+      const base = this.apiBase() || ''
+      return base ? `${base}${path}` : path
+    },
     async verifyToken(token) {
       this.verifyError = null
       try {
-        const url = `/api/relic/verify?token=${encodeURIComponent(token)}`;
+        const url = this.fullApi(`/api/relic/verify?token=${encodeURIComponent(token)}`);
         const res = await fetch(url);
         const body = await res.json().catch(()=>({}));
         if (!res.ok || body.error) {
@@ -287,7 +299,7 @@ export default {
       if (!key) return this.isAdmin = false;
       try {
         // quick test call to confirm key works
-        const res = await fetch('/api/admin/relics/sample', { headers: { 'x-admin-key': key } });
+        const res = await fetch(this.fullApi('/api/admin/relics/sample'), { headers: { 'x-admin-key': key } });
         if (!res.ok) { this.isAdmin = false; this.adminKey = ''; throw new Error('invalid_admin_key') }
         this.adminKey = key;
         this.isAdmin = true;
@@ -303,7 +315,7 @@ export default {
       const id = parseInt(this.adminVerifyId, 10);
       if (!id) return this.adminVerifyResult = 'invalid_id';
       try {
-        const res = await fetch('/api/admin/relic/verify-internal', { method: 'POST', headers: { 'Content-Type':'application/json', 'x-admin-key': this.adminKey }, body: JSON.stringify({ id, internal_code: this.adminInternalCode }) });
+        const res = await fetch(this.fullApi('/api/admin/relic/verify-internal'), { method: 'POST', headers: { 'Content-Type':'application/json', 'x-admin-key': this.adminKey }, body: JSON.stringify({ id, internal_code: this.adminInternalCode }) });
         const body = await res.json().catch(()=>({}));
         if (!res.ok) return this.adminVerifyResult = body.error || 'verify_failed';
         this.adminVerifyResult = body.match ? 'match' : 'no_match';
@@ -340,7 +352,7 @@ export default {
       if (typeof payload.owner_name === 'string') bodyPayload.owner_name = payload.owner_name || null;
       if (typeof payload.owner_date === 'string') bodyPayload.owner_date = payload.owner_date || null;
       try {
-        const res = await fetch('/api/admin/relic/update', { method: 'POST', headers: { 'Content-Type':'application/json', 'x-admin-key': this.adminKey }, body: JSON.stringify(bodyPayload) });
+        const res = await fetch(this.fullApi('/api/admin/relic/update'), { method: 'POST', headers: { 'Content-Type':'application/json', 'x-admin-key': this.adminKey }, body: JSON.stringify(bodyPayload) });
         const body = await res.json().catch(()=>({}));
         if (!res.ok || body.error) {
           console.warn('admin update failed', body.error || body);
@@ -427,7 +439,7 @@ export default {
       // client-side validation
       if (!/^[A-Za-z0-9]{1,15}$/.test(name)) { this.verifyError = 'invalid_name'; return }
       try {
-        const res = await fetch('/api/relic/claim', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ token: this.foundToken, name }) })
+        const res = await fetch(this.fullApi('/api/relic/claim'), { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ token: this.foundToken, name }) })
         const body = await res.json().catch(()=>({}));
         if (!res.ok || body.error) {
           if (body && body.error === 'invalid_name') { this.verifyError = 'invalid_name'; return }
@@ -481,7 +493,7 @@ export default {
       // client-side validation
       if (!/^[A-Za-z0-9]{1,15}$/.test(name)) { this.verifyError = 'invalid_name'; return }
       try {
-        const res = await fetch('/api/relic/rename', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ token: this.foundToken, name }) })
+        const res = await fetch(this.fullApi('/api/relic/rename'), { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ token: this.foundToken, name }) })
         const body = await res.json().catch(()=>({}));
         if (!res.ok || body.error) {
           if (body && body.error === 'invalid_name') { this.verifyError = 'invalid_name'; return }

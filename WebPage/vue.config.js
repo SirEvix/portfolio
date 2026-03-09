@@ -7,7 +7,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '^/api': {
-        target: 'http://localhost:4000',
+        target: 'https://relic-backend.onrender.com',
         changeOrigin: true,
         secure: false,
         logLevel: 'info'

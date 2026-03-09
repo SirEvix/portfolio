@@ -24,26 +24,26 @@ Easy, step-by-step run instructions (for beginners)
 
    npm start
 
-   - The server listens on `http://localhost:4000` by default.
-   - Keep this terminal open while you use the frontend. Your frontend will call the server at this address.
+   - The server listens on `http://localhost:4000` by default when run locally.
+   - When deployed, the frontend should call the server's production URL (e.g. https://relic-backend.onrender.com).
 
 How the frontend uses the server
-- The frontend should call endpoints at `http://localhost:4000` (or the server's URL if deployed).
+- The frontend should call endpoints at `http://localhost:4000` for local development, or the deployed server URL (e.g. https://relic-backend.onrender.com).
 - Example requests:
 
-  Verify a token (GET):
-  GET http://localhost:4000/api/relic/verify?token=THE_TOKEN
+   Verify a token (GET):
+   GET https://relic-backend.onrender.com/api/relic/verify?token=THE_TOKEN
 
-  Claim a relic (POST):
-  POST http://localhost:4000/api/relic/claim
+   Claim a relic (POST):
+   POST https://relic-backend.onrender.com/api/relic/claim
   Body JSON: { "token": "THE_TOKEN", "name": "Alice" }
 
-  Mark a relic as sent (admin):
-  POST http://localhost:4000/api/admin/relic/send
+   Mark a relic as sent (admin):
+   POST https://relic-backend.onrender.com/api/admin/relic/send
   Body JSON: { "id": 27 }
 
-  Verify an internal code (admin):
-  POST http://localhost:4000/api/admin/relic/verify-internal
+   Verify an internal code (admin):
+   POST https://relic-backend.onrender.com/api/admin/relic/verify-internal
   Body JSON: { "id": 27, "internal_code": "secret" }
 
 How the data is stored and updated
