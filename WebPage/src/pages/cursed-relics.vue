@@ -259,7 +259,7 @@ export default {
         const envBase = process.env.VUE_APP_API_BASE
         if (envBase && envBase.length) return envBase.replace(/\/$/, '')
       } catch (e) { /* noop when env not available */ }
-      return 'https://relic-backend.onrender.com'
+      return 'https://relic-backend-oh7f.onrender.com'
     }, // configured API base
     fullApi(path) {
       // path should start with '/'
