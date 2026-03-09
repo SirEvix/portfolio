@@ -6,6 +6,8 @@ import DevelopmentPage from '@/pages/Development.vue';
 import PhotographyPage from '@/pages/Photography.vue';
 import VideoPage from '@/pages/Video.vue';
 import GraphicDesignPage from '@/pages/GraphicDesign.vue';
+import TheVaultPage from '@/pages/TheVault.vue';
+import CursedRelicsPage from '@/pages/cursed-relics.vue';
 
 const routes = [
   {
@@ -42,6 +44,17 @@ const routes = [
     path: '/graphic-design',
     name: 'GraphicDesign',
     component: GraphicDesignPage
+  }
+,
+  {
+    path: '/the-vault',
+    name: 'TheVault',
+    component: TheVaultPage
+  },
+  {
+    path: '/cursed-relics',
+    name: 'CursedRelics',
+    component: CursedRelicsPage
   }
 ];
 

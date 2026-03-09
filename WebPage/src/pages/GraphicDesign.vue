@@ -98,7 +98,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '../assets/styles/global.scss';
+@use '../assets/styles/global.scss' as *;
 
 .forgeImage {
   height: 80vh;

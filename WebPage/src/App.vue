@@ -18,4 +18,10 @@ html, body, #app {
   height: 100%;
   overflow: hidden;
 }
+
+/* When admin mode requires the whole page to scroll, toggle this class on <body> */
+body.admin-visible, html.admin-visible, #app.admin-visible {
+  height: auto;
+  overflow: auto;
+}
 </style>

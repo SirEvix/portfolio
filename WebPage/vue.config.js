@@ -4,6 +4,16 @@ const webpack = require('webpack');
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  devServer: {
+    proxy: {
+      '^/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        secure: false,
+        logLevel: 'info'
+      }
+    }
+  },
   configureWebpack: {
     resolve: {
       alias: {

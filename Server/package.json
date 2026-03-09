@@ -1,0 +1,14 @@
+{
+  "name": "cursed-relics-server",
+  "version": "0.1.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node init_db.js",
+    "fill-db": "node fill_hashes.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

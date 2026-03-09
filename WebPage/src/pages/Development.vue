@@ -117,7 +117,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '../assets/styles/global.scss';
+@use '../assets/styles/global.scss' as *;
 
 .brandingImage {
   width: 100%;
