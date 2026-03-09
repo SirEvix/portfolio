@@ -18,7 +18,7 @@
 
 const express = require('express');
 const bodyParser = require('express').json;
-const { loadRelics, saveRelics } = require('./db');
+const { loadRelics, saveRelics, JSON_PATH } = require('./db');
 const { hashToken, hashInternalCode } = require('./utils/hash');
 
 const app = express();
@@ -40,6 +40,16 @@ function adminAuth(req, res, next) {
 // In-memory cache of relics (loaded on demand)
 let RELICS = loadRelics();
 function reloadRelics() { RELICS = loadRelics(); }
+
+// Log how many relics were loaded at startup to aid deployments/health checks
+try {
+  console.log(`Loaded ${Array.isArray(RELICS) ? RELICS.length : 0} relics from ${JSON_PATH}`);
+} catch (e) { console.warn('Unable to log relic count', e) }
+
+// Simple root/status route useful for healthchecks and for verifying deployed data
+app.get('/', (req, res) => {
+  return res.json({ message: 'Relic backend is live', time: new Date().toISOString(), relic_count: Array.isArray(RELICS) ? RELICS.length : 0 });
+});
 
 function findRelicByTokenHash(tokenHash) {
   return RELICS.find(r => r.token_hash === tokenHash) || null;
