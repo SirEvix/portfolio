@@ -228,7 +228,6 @@ export default {
       this.startWakeSequence()
     },
 
-  },
   watch: {
     adminPanelVisible(val) {
       try {
@@ -345,7 +344,7 @@ export default {
       this.wakePollIntervalId = setInterval(attempt, 3000)
     },
 
-    stopWakeSequence(success) {
+    stopWakeSequence() {
       if (this.wakeTimerId) { clearInterval(this.wakeTimerId); this.wakeTimerId = null }
       if (this.wakePollIntervalId) { clearInterval(this.wakePollIntervalId); this.wakePollIntervalId = null }
       this.isWaking = false
