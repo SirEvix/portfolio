@@ -15,8 +15,22 @@
           <div v-if="heroOverlay.center" class="hero-center">{{ heroOverlay.center }}</div>
         </div>
       </div>
-      <h1 class="hero-title">Cursed Relics</h1>
-      <p class="hero-sub">Limited cursed collectibles.</p>
+      <template v-if="!isWaking">
+        <h1 class="hero-title">Cursed Relics</h1>
+        <p class="hero-sub">Limited cursed collectibles.</p>
+      </template>
+      <template v-else>
+        <div style="padding:10px 14px;color:#fff;font-weight:800">
+          <div style="font-size:18px;margin-bottom:8px">The curse is evaluating your worth…</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Do not interrupt the ritual.</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;background:rgba(255,255,255,0.04);height:12px;border-radius:8px;overflow:hidden">
+              <div :style="{ width: Math.min(100, (wakeElapsed / wakeDuration) * 100) + '%', height:'100%', background:'linear-gradient(90deg,#9d6fff,#b48cff)' }"></div>
+            </div>
+            <div style="min-width:56px;color:var(--muted);font-weight:700">{{ Math.max(0, Math.ceil((wakeDuration - wakeElapsed)/1000)) }}s</div>
+          </div>
+        </div>
+      </template>
     </section>
 
     <section class="relics">
@@ -64,7 +78,7 @@
         <h3 v-else-if="foundRelicStatus === 'invalid'">Unknown tag</h3>
         <h3 v-else-if="foundRelicStatus === 'error'">Verification error</h3>
 
-        <p v-if="foundRelicId && foundRelicStatus !== 'claimed'">Write your name to claim this finger.</p>
+        <p v-if="foundRelicId && foundRelicStatus !== 'claimed'">The relic accepts your presence. You have 15 minutes to write your name and claim it.</p>
         <p v-if="foundRelicId && foundRelicStatus === 'claimed'">Already claimed by: {{ foundOwnerName || 'unknown' }}</p>
 
         <div class="claim-controls" v-if="foundRelicId && foundRelicStatus !== 'claimed'">
@@ -201,55 +215,19 @@ export default {
       // admin UI messages
       adminError: null,
       adminSuccess: null,
+      // wake / server-start sequence
+      isWaking: false,
+      wakeDuration: 60000, // ms
+      wakeElapsed: 0,
+      wakeTimerId: null,
+      wakePollIntervalId: null,
     }
   },
     mounted() {
-    // Prefer authoritative server state: try /api/relics on configured API base, then fallback to bundled assets, then generated mock
-    fetch(this.fullApi('/api/relics'))
-      .then(r => {
-        // only accept successful JSON responses that are arrays
-        if (!r.ok) throw new Error('bad_response')
-        return r.json()
-      })
-      .then(data => {
-        if (Array.isArray(data)) this.relics = data
-        else throw new Error('invalid_data')
-      })
-      .catch(() => {
-        return fetch('/assets/relics.json').then(r => r.json()).then(data => { this.relics = data }).catch(()=>{ this.relics = Array.from({ length: 500 }, (_, i) => ({ id: i+1, status: 'Dormant' })) })
-      }).finally(() => {
-      // auto-verify token in URL
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-        if (token === 'isadmin') {
-          // reveal admin panel only (do not treat as relic token)
-          this.adminPanelVisible = true;
-          try {
-            document.body.classList.add('admin-visible')
-            try { document.documentElement.classList.add('admin-visible') } catch(e) { /* noop */ }
-            try { const appEl = document.getElementById('app'); if (appEl) appEl.classList.add('admin-visible') } catch(e) { /* noop */ }
-          } catch(e) { /* noop */ }
-        } else if (token) {
-          this.foundToken = token;
-          // show initial hero gif when token present
-          this.heroGifVisible = true;
-          this.heroGifSrc = cursedFingerGif;
-          this.heroOverlay.topLeft = 'You found the finger';
-          this.heroOverlay.center = '';
-          this.verifyToken(token);
-        } else {
-          // default hero image when no token: sleeping character + shimmer
-          this.heroGifVisible = true;
-          this.heroGifSrc = sleepingImg;
-          this.heroOverlay.topLeft = '';
-          this.heroOverlay.center = 'Awaiting NFC scan tap your tag';
-          this.heroOverlay.topRight = '';
-          this.heroOverlay.bottomLeft = '';
-          this.heroOverlay.bottomRight = '';
-        }
-      } catch(e){ console.warn('token parse error', e) }
-    })
+      // Start wake/poll sequence on page load so Render/Heroku-style sleeping backends can start
+      this.startWakeSequence()
+    },
+
   },
   watch: {
     adminPanelVisible(val) {
@@ -329,6 +307,96 @@ export default {
         this.showFoundPopup = true
         this.foundRelicStatus = 'error'
       }
+    },
+    startWakeSequence() {
+      // show waiting overlay and start progress
+      this.isWaking = true
+      this.wakeElapsed = 0
+      this.wakeStart = Date.now()
+      this.heroGifVisible = true
+      this.heroGifSrc = cursedFingerGif
+      this.heroOverlay.topLeft = 'The curse is evaluating your worth…'
+      this.heroOverlay.center = 'Do not interrupt the ritual.'
+
+      // progress timer
+      if (this.wakeTimerId) clearInterval(this.wakeTimerId)
+      this.wakeTimerId = setInterval(() => {
+        this.wakeElapsed = Date.now() - this.wakeStart
+        if (this.wakeElapsed >= this.wakeDuration) {
+          this.stopWakeSequence(false)
+        }
+      }, 250)
+
+      // immediate ping and poll every 3s
+      const attempt = async () => {
+        try {
+          const res = await fetch(this.fullApi('/api/relics'))
+          const body = await res.json().catch(()=>null)
+          if (res.ok && Array.isArray(body)) {
+            // server is awake and responding
+            this.stopWakeSequence(true)
+          }
+        } catch (e) {
+          // ignore network errors; keep polling
+        }
+      }
+      attempt()
+      if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId)
+      this.wakePollIntervalId = setInterval(attempt, 3000)
+    },
+
+    stopWakeSequence(success) {
+      if (this.wakeTimerId) { clearInterval(this.wakeTimerId); this.wakeTimerId = null }
+      if (this.wakePollIntervalId) { clearInterval(this.wakePollIntervalId); this.wakePollIntervalId = null }
+      this.isWaking = false
+      this.wakeElapsed = Math.min(this.wakeDuration, Date.now() - (this.wakeStart || Date.now()))
+      // after waking (or timeout) load relics and continue normal flow
+      this.loadRelics()
+    },
+
+    loadRelics() {
+      // Prefer authoritative server state: try /api/relics on configured API base, then fallback to bundled assets, then generated mock
+      fetch(this.fullApi('/api/relics'))
+        .then(r => {
+          // only accept successful JSON responses that are arrays
+          if (!r.ok) throw new Error('bad_response')
+          return r.json()
+        })
+        .then(data => {
+          if (Array.isArray(data)) this.relics = data
+          else throw new Error('invalid_data')
+        })
+        .catch(() => {
+          return fetch('/assets/relics.json').then(r => r.json()).then(data => { this.relics = data }).catch(()=>{ this.relics = Array.from({ length: 500 }, (_, i) => ({ id: i+1, status: 'Dormant' })) })
+        }).finally(() => {
+        // auto-verify token in URL after relics are available
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const token = params.get('token');
+          if (token === 'isadmin') {
+            // reveal admin panel only (do not treat as relic token)
+            this.adminPanelVisible = true;
+            try {
+              document.body.classList.add('admin-visible')
+              try { document.documentElement.classList.add('admin-visible') } catch(e) { /* noop */ }
+              try { const appEl = document.getElementById('app'); if (appEl) appEl.classList.add('admin-visible') } catch(e) { /* noop */ }
+            } catch(e) { /* noop */ }
+          } else if (token) {
+            this.foundToken = token;
+            // verify token after wake
+            this.verifyToken(token);
+          } else {
+            // default hero image when no token: sleeping character + shimmer
+            this.heroGifVisible = true;
+            this.heroGifSrc = sleepingImg;
+            this.heroOverlay.topLeft = '';
+            this.heroOverlay.center = 'Awaiting NFC scan tap your tag';
+            this.heroOverlay.topRight = '';
+            this.heroOverlay.bottomLeft = '';
+            this.heroOverlay.bottomRight = '';
+          }
+        } catch(e){ console.warn('token parse error', e) }
+      })
     },
     async enterAdminKey() {
       const key = (this.adminKeyInput || '').trim();
