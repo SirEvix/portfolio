@@ -18,7 +18,8 @@
 
 const express = require('express');
 const bodyParser = require('express').json;
-const { loadRelics, saveRelics, JSON_PATH } = require('./db');
+const fs = require('fs');
+const { loadRelics, saveRelics, JSON_PATH, PERSIST_LOG, getPersistenceStatus } = require('./db');
 const { hashToken, hashInternalCode } = require('./utils/hash');
 
 const app = express();
@@ -61,6 +62,23 @@ try {
 // Simple root/status route useful for healthchecks and for verifying deployed data
 app.get('/', (req, res) => {
   return res.json({ message: 'Relic backend is live', time: new Date().toISOString(), relic_count: Array.isArray(RELICS) ? RELICS.length : 0 });
+});
+
+// Debug: persistence status and tail of persist.log
+app.get('/api/debug/persistence', (req, res) => {
+  try {
+    const status = getPersistenceStatus();
+    let tail = null;
+    if (fs.existsSync(PERSIST_LOG)) {
+      const raw = fs.readFileSync(PERSIST_LOG, 'utf8');
+      const lines = raw.split(/\r?\n/).filter(Boolean);
+      tail = lines.slice(-50);
+    }
+    return res.json({ status, persist_log_tail: tail });
+  } catch (e) {
+    console.error('Error in /api/debug/persistence', e);
+    return res.status(500).json({ error: 'debug_failed', detail: String(e) });
+  }
 });
 
 function findRelicByTokenHash(tokenHash) {
