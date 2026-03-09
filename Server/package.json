@@ -6,9 +6,11 @@
   "scripts": {
     "start": "node server.js",
     "init-db": "node init_db.js",
-    "fill-db": "node fill_hashes.js"
+    "fill-db": "node fill_hashes.js",
+    "migrate-db": "node migrate_to_pg.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "pg": "^8.10.0"
   }
 }

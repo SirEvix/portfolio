@@ -50,14 +50,17 @@ function adminAuth(req, res, next) {
   return next();
 }
 
-// In-memory cache of relics (loaded on demand)
-let RELICS = loadRelics();
-function reloadRelics() { RELICS = loadRelics(); }
+// In-memory cache of relics (loaded on startup)
+let RELICS = [];
+async function reloadRelics() { RELICS = await loadRelics(); }
 
-// Log how many relics were loaded at startup to aid deployments/health checks
-try {
-  console.log(`Loaded ${Array.isArray(RELICS) ? RELICS.length : 0} relics from ${JSON_PATH}`);
-} catch (e) { console.warn('Unable to log relic count', e) }
+// Async startup: load relics then start server
+async function startServer() {
+  RELICS = await loadRelics();
+  try {
+    console.log(`Loaded ${Array.isArray(RELICS) ? RELICS.length : 0} relics from ${JSON_PATH}`);
+  } catch (e) { console.warn('Unable to log relic count', e) }
+}
 
 // Simple root/status route useful for healthchecks and for verifying deployed data
 app.get('/', (req, res) => {
@@ -65,9 +68,9 @@ app.get('/', (req, res) => {
 });
 
 // Debug: persistence status and tail of persist.log
-app.get('/api/debug/persistence', (req, res) => {
+app.get('/api/debug/persistence', async (req, res) => {
   try {
-    const status = getPersistenceStatus();
+    const status = await getPersistenceStatus();
     let tail = null;
     if (fs.existsSync(PERSIST_LOG)) {
       const raw = fs.readFileSync(PERSIST_LOG, 'utf8');
@@ -89,8 +92,8 @@ function findRelicById(id) {
   return RELICS.find(r => r.id === id) || null;
 }
 
-function persist() {
-  saveRelics(RELICS);
+async function persist() {
+  await saveRelics(RELICS);
 }
 
 // GET /api/relic/verify?token=...
@@ -104,7 +107,7 @@ app.get('/api/relic/verify', (req, res) => {
 });
 
 // POST /api/relic/claim  Body: { token, name }
-app.post('/api/relic/claim', (req, res) => {
+app.post('/api/relic/claim', async (req, res) => {
   const { token, name } = req.body || {};
   if (!token || !name) return res.status(400).json({ error: 'missing_fields' });
   // validate name: 1-15 chars, alphanumeric only
@@ -118,19 +121,19 @@ app.post('/api/relic/claim', (req, res) => {
   relic.status = 'claimed';
   relic.owner_name = name;
   relic.owner_date = now;
-  persist();
+  try { await persist(); } catch (e) { console.error('persist failed', e); return res.status(500).json({ error: 'persist_failed' }); }
   const updated = { id: relic.id, status: relic.status, owner_name: relic.owner_name, owner_date: relic.owner_date };
   return res.json({ success: true, relic: updated });
 });
 
 // POST /api/admin/relic/send  Body: { id }
-app.post('/api/admin/relic/send', adminAuth, (req, res) => {
+app.post('/api/admin/relic/send', adminAuth, async (req, res) => {
   const { id } = req.body || {};
   if (!id) return res.status(400).json({ error: 'missing_id' });
   const relic = findRelicById(id);
   if (!relic) return res.status(404).json({ error: 'not_found' });
   relic.status = 'sent';
-  persist();
+  try { await persist(); } catch (e) { console.error('persist failed', e); return res.status(500).json({ error: 'persist_failed' }); }
   return res.json({ success: true, id });
 });
 
@@ -147,7 +150,7 @@ app.post('/api/admin/relic/verify-internal', adminAuth, (req, res) => {
 
 // POST /api/admin/relic/update  Body: { id, status?, owner_name?, owner_date? }
 // Allows admins to update metadata for a relic (status, owner_name, owner_date)
-app.post('/api/admin/relic/update', adminAuth, (req, res) => {
+app.post('/api/admin/relic/update', adminAuth, async (req, res) => {
   const { id, status, owner_name, owner_date } = req.body || {};
   if (!id) return res.status(400).json({ error: 'missing_id' });
   const relic = findRelicById(id);
@@ -163,7 +166,7 @@ app.post('/api/admin/relic/update', adminAuth, (req, res) => {
     relic.owner_date = owner_date === null ? null : owner_date;
   }
   // persist changes
-  persist();
+  try { await persist(); } catch (e) { console.error('persist failed', e); return res.status(500).json({ error: 'persist_failed' }); }
   return res.json({ success: true, relic: { id: relic.id, status: relic.status, owner_name: relic.owner_name, owner_date: relic.owner_date } });
 });
 
@@ -182,7 +185,7 @@ app.get('/api/relics', (req, res) => {
 
 // POST /api/relic/rename  Body: { token, name }
 // Allows the holder of a token to change the owner_name for their relic.
-app.post('/api/relic/rename', (req, res) => {
+app.post('/api/relic/rename', async (req, res) => {
   const { token, name } = req.body || {};
   if (!token || !name) return res.status(400).json({ error: 'missing_fields' });
   // validate name: 1-15 chars, alphanumeric only
@@ -193,10 +196,16 @@ app.post('/api/relic/rename', (req, res) => {
   // Permit rename regardless of claimed status as long as token matches
   relic.owner_name = name;
   relic.owner_date = new Date().toISOString();
-  persist();
+  try { await persist(); } catch (e) { console.error('persist failed', e); return res.status(500).json({ error: 'persist_failed' }); }
   return res.json({ success: true, relic: { id: relic.id, status: relic.status, owner_name: relic.owner_name, owner_date: relic.owner_date } });
 });
 
-app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+// start server after loading data
+startServer().then(() => {
+  app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+}).catch(err => {
+  console.error('Failed to start server', err);
+  process.exit(1);
+});
 
 module.exports = app; // exported for tests or imports
