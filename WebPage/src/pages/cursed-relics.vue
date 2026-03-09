@@ -104,6 +104,20 @@
         <div v-if="adminVerifyResult" style="color:var(--muted);font-size:13px;margin-left:8px">{{ adminVerifyResult }}</div>
       </div>
 
+      <div style="margin-bottom:12px">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Status summary (click an id to load)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div v-for="(list, label) in { Claimed: statusGroups.claimed, Sent: statusGroups.sent, Reserved: statusGroups.reserved, Disputed: statusGroups.disputed, Void: statusGroups.void, Dormant: statusGroups.dormant }" :key="label" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px">
+            <strong style="width:88px">{{ label }}:</strong>
+            <template v-if="list && list.length">
+              <button v-for="id in list.slice(0,60)" :key="label+'-'+id" @click.prevent="adminTargetId = id; adminLoadTarget()" style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);color:#fff;font-size:13px">#{{ id }}</button>
+              <span v-if="list.length > 60" style="color:var(--muted);margin-left:6px">…{{ list.length - 60 }} more</span>
+            </template>
+            <span v-else style="color:var(--muted)">— none</span>
+          </div>
+        </div>
+      </div>
+
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
         <input placeholder="target id" v-model="adminTargetId" style="padding:6px;border-radius:6px;width:96px" />
         <button @click="adminLoadTarget">Load</button>
@@ -252,6 +266,18 @@ export default {
       try { const appEl = document.getElementById('app'); if (appEl) appEl.classList.remove('admin-visible') } catch(e) { /* noop */ }
     } catch(e) { /* noop */ }
   },
+  computed: {
+    // grouped lists of relic ids per status for the admin summary UI
+    statusGroups() {
+      const groups = { claimed: [], sent: [], reserved: [], disputed: [], void: [], dormant: [] }
+      for (const r of this.relics || []) {
+        const s = (r.status || 'dormant').toLowerCase()
+        if (!groups[s]) groups[s] = []
+        groups[s].push(r.id)
+      }
+      return groups
+    }
+  },
   methods: {
     apiBase() {
       // Prefer explicit build-time env var, otherwise default to your Render backend
@@ -358,9 +384,10 @@ export default {
       if (!id || id < 1) { this.adminError = 'missing_id'; return }
       // build a clean body only with allowed fields
       const bodyPayload = { id };
-      if (typeof payload.status === 'string' && payload.status.length) bodyPayload.status = payload.status;
-      if (typeof payload.owner_name === 'string') bodyPayload.owner_name = payload.owner_name || null;
-      if (typeof payload.owner_date === 'string') bodyPayload.owner_date = payload.owner_date || null;
+      if (Object.prototype.hasOwnProperty.call(payload, 'status')) bodyPayload.status = payload.status;
+      // include owner fields even if explicitly null so server can clear them
+      if (Object.prototype.hasOwnProperty.call(payload, 'owner_name')) bodyPayload.owner_name = payload.owner_name;
+      if (Object.prototype.hasOwnProperty.call(payload, 'owner_date')) bodyPayload.owner_date = payload.owner_date;
       try {
         const res = await fetch(this.fullApi('/api/admin/relic/update'), { method: 'POST', headers: { 'Content-Type':'application/json', 'x-admin-key': this.adminKey }, body: JSON.stringify(bodyPayload) });
         const body = await res.json().catch(()=>({}));

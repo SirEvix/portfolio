@@ -134,9 +134,16 @@ app.post('/api/admin/relic/update', adminAuth, (req, res) => {
   if (!id) return res.status(400).json({ error: 'missing_id' });
   const relic = findRelicById(id);
   if (!relic) return res.status(404).json({ error: 'not_found' });
+  // Update status if provided as a string
   if (typeof status === 'string') relic.status = status;
-  if (typeof owner_name === 'string') relic.owner_name = owner_name;
-  if (typeof owner_date === 'string') relic.owner_date = owner_date;
+  // Allow owner_name to be set to a string or explicitly cleared with null
+  if (Object.prototype.hasOwnProperty.call(req.body, 'owner_name')) {
+    relic.owner_name = owner_name === null ? null : owner_name;
+  }
+  // Allow owner_date to be set to a string or explicitly cleared with null
+  if (Object.prototype.hasOwnProperty.call(req.body, 'owner_date')) {
+    relic.owner_date = owner_date === null ? null : owner_date;
+  }
   // persist changes
   persist();
   return res.json({ success: true, relic: { id: relic.id, status: relic.status, owner_name: relic.owner_name, owner_date: relic.owner_date } });
