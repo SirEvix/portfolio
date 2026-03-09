@@ -176,6 +176,28 @@ app.get('/api/admin/relics/sample', adminAuth, (req, res) => {
   res.json(rows);
 });
 
+// ADMIN: migrate from bundled file into the active persistence backend
+// Body optional: { force: true } or query ?force=1 to overwrite non-empty DB
+app.post('/api/admin/migrate_from_file', adminAuth, async (req, res) => {
+  try {
+    const force = (req.query && req.query.force === '1') || (req.body && req.body.force === true);
+    const status = await getPersistenceStatus();
+    if (status && typeof status.count === 'number' && status.count > 0 && !force) {
+      return res.status(409).json({ error: 'db_not_empty', count: status.count, message: 'Pass ?force=1 or {"force":true} to overwrite' });
+    }
+    // Read the bundled JSON file and import it
+    const raw = fs.readFileSync(JSON_PATH, 'utf8');
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return res.status(400).json({ error: 'invalid_file_format' });
+    RELICS = arr;
+    await saveRelics(RELICS);
+    return res.json({ success: true, imported: RELICS.length });
+  } catch (e) {
+    console.error('migrate_from_file failed', e);
+    return res.status(500).json({ error: 'migrate_failed', detail: String(e) });
+  }
+});
+
 // Public endpoint: list all relics (public metadata only)
 // Returns array of { id, status, owner_name, owner_date }
 app.get('/api/relics', (req, res) => {
