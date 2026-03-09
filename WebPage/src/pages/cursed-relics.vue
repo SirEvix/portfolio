@@ -191,9 +191,19 @@ export default {
   },
     mounted() {
     // Prefer authoritative server state: try /api/relics on configured API base, then fallback to bundled assets, then generated mock
-    fetch(this.fullApi('/api/relics')).then(r => r.json()).then(data => { this.relics = data }).catch(() => {
-      return fetch('/assets/relics.json').then(r => r.json()).then(data => { this.relics = data }).catch(()=>{ this.relics = Array.from({ length: 500 }, (_, i) => ({ id: i+1, status: 'Dormant' })) })
-    }).finally(() => {
+    fetch(this.fullApi('/api/relics'))
+      .then(r => {
+        // only accept successful JSON responses that are arrays
+        if (!r.ok) throw new Error('bad_response')
+        return r.json()
+      })
+      .then(data => {
+        if (Array.isArray(data)) this.relics = data
+        else throw new Error('invalid_data')
+      })
+      .catch(() => {
+        return fetch('/assets/relics.json').then(r => r.json()).then(data => { this.relics = data }).catch(()=>{ this.relics = Array.from({ length: 500 }, (_, i) => ({ id: i+1, status: 'Dormant' })) })
+      }).finally(() => {
       // auto-verify token in URL
       try {
         const params = new URLSearchParams(window.location.search);
