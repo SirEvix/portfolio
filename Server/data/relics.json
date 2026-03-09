@@ -36,11 +36,8 @@
     "token_hash": "c902335faf7db08bba86cd98b1beae8da3248aa6577204811a11ea6b4df47b8d",
     "internal_code_hash": "1d17bfa62d6271200289cc1745293507c141e016310bede222fcd6d202c651db",
     "status": "claimed",
-    [ ]
-    "internal_code_hash": "5811eb905121be93aee2c222d7557fced11391f206b22f9a0fb8e8e1cdd65331",
-    "status": "dormant",
-    "owner_name": null,
-    "owner_date": null
+    "owner_name": "AutomatedTest",
+    "owner_date": "2026-03-09T02:01:46.611Z"
   },
   {
     "id": 32,
