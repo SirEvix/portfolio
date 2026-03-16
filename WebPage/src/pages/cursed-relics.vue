@@ -52,12 +52,11 @@
             @click="(relic && relic.status && String(relic.status).toLowerCase()) === 'void' ? null : onCardClick(relic)"
           >
             <div class="thumb">
-              <div class="thumb-placeholder">IMG</div>
+              <div class="thumb-placeholder">#{{ relic.id }}</div>
             </div>
             <div class="card-body">
               <div class="card-title">Cursed Finger</div>
               <div class="relic-meta">
-                <span class="relic-num">#{{ relic.id }}</span>
                 <span class="badge" :class="relic.status ? relic.status.toLowerCase() : 'dormant'">{{ relic.status || 'Dormant' }}</span>
               </div>
               <div class="owner-line" v-if="relic.owner_name">
@@ -748,11 +747,39 @@ export default {
 
 .hero-image { position: absolute; left:0; top:0; width:100%; height:100%; object-fit:cover; z-index:0; border-radius:12px; object-position: 50% 10%; }
 .hero-text { position: relative; z-index:3; width:100%; padding: 10px 14px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; height:100% }
-.hero-top, .hero-bottom { display:flex; justify-content:space-between; align-items:center }
-.hero-top-left, .hero-top-right, .hero-bottom-left, .hero-bottom-right { color: #fff; font-weight:700 }
+.hero-top, .hero-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Each text cell gets its own compact backdrop only when it contains text */
+.hero-top-left,
+.hero-top-right,
+.hero-bottom-left,
+.hero-bottom-right {
+  display: inline-block;
+  background: rgba(0,0,0,0.35);
+  padding: 6px 10px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+/* Hide empty cells so backgrounds only appear when text is present */
+.hero-top-left:empty,
+.hero-top-right:empty,
+.hero-bottom-left:empty,
+.hero-bottom-right:empty {
+  display: none;
+}
+
 .hero-top-left { font-size:16px; color: var(--accent-2) }
 .hero-top-right { font-size:14px }
-.hero-bottom-left, .hero-bottom-right { font-size:12px; color:var(--muted) }
+.hero-bottom-left, .hero-bottom-right { font-size:12px; color: rgba(255,255,255,0.9) }
 .hero-center { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.2); padding:10px 14px; border-radius:10px; z-index:4; color:#fff; font-weight:700; text-align:center; max-width:80%; }
 
 @keyframes shimmer {
