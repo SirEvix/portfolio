@@ -29,6 +29,10 @@
             </div>
             <div style="min-width:56px;color:var(--muted);font-weight:700">{{ Math.max(0, Math.ceil((wakeDuration - wakeElapsed)/1000)) }}s</div>
           </div>
+          <div v-if="stalledMessageVisible" :class="['stalled-message', { fading: stalledMessageFading }]" style="margin-top:12px;padding:10px 14px;color:#fff;font-weight:800">
+            <div style="font-size:16px;margin-bottom:6px">The ritual has stalled… but something within it has noticed you.</div>
+            <div style="font-size:13px;color:var(--muted)">You may still step away… or remain and see what answers.</div>
+          </div>
         </div>
       </template>
     </section>
@@ -220,6 +224,12 @@ export default {
       wakeElapsed: 0,
       wakeTimerId: null,
       wakePollIntervalId: null,
+      // timed-out / stalled UI state
+      wakeTimedOut: false,
+      stalledMessageVisible: false,
+      stalledMessageFading: false,
+      stalledHideTimeoutId: null,
+      stalledFadeTimeoutId: null,
     }
   },
     mounted() {
@@ -241,6 +251,11 @@ export default {
       try { document.documentElement.classList.remove('admin-visible') } catch(e) { /* noop */ }
       try { const appEl = document.getElementById('app'); if (appEl) appEl.classList.remove('admin-visible') } catch(e) { /* noop */ }
     } catch(e) { /* noop */ }
+      // clean up timers/timeouts
+      try { if (this.wakeTimerId) clearInterval(this.wakeTimerId) } catch(e) {}
+      try { if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId) } catch(e) {}
+      try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) {}
+      try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) {}
   },
   computed: {
     // grouped lists of relic ids per status for the admin summary UI
@@ -316,12 +331,19 @@ export default {
       this.heroOverlay.topLeft = 'The curse is evaluating your worth…'
       this.heroOverlay.center = 'Do not interrupt the ritual.'
 
-      // progress timer
+      // progress timer (freeze at duration once timed out)
       if (this.wakeTimerId) clearInterval(this.wakeTimerId)
       this.wakeTimerId = setInterval(() => {
         this.wakeElapsed = Date.now() - this.wakeStart
         if (this.wakeElapsed >= this.wakeDuration) {
-          this.stopWakeSequence(false)
+          // mark timed-out once, stop the numeric countdown but keep polling
+          if (!this.wakeTimedOut) {
+            this.wakeTimedOut = true
+            this.wakeElapsed = this.wakeDuration
+            if (this.wakeTimerId) { clearInterval(this.wakeTimerId); this.wakeTimerId = null }
+            this.stalledMessageVisible = true
+            this.stalledMessageFading = false
+          }
         }
       }, 250)
 
@@ -332,7 +354,19 @@ export default {
           const body = await res.json().catch(()=>null)
           if (res.ok && Array.isArray(body)) {
             // server is awake and responding
-            this.stopWakeSequence(true)
+            // show the transient post-awake message for 3s, fade, then finalize
+            // ensure message visible
+            this.stalledMessageVisible = true
+            this.stalledMessageFading = false
+            // clear any prior timeouts
+            try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) {}
+            try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) {}
+            this.stalledHideTimeoutId = setTimeout(() => {
+              this.stalledMessageFading = true
+              this.stalledFadeTimeoutId = setTimeout(() => {
+                this.finalizeAfterStall()
+              }, 1000)
+            }, 3000)
           }
         } catch (e) {
           // ignore network errors; keep polling
@@ -350,6 +384,28 @@ export default {
       this.wakeElapsed = Math.min(this.wakeDuration, Date.now() - (this.wakeStart || Date.now()))
       // after waking (or timeout) load relics and continue normal flow
       this.loadRelics()
+    },
+
+    finalizeAfterStall() {
+      // stop polling and timers, reset stall flags, then load relics
+      try { if (this.wakeTimerId) clearInterval(this.wakeTimerId) } catch(e) {}
+      try { if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId) } catch(e) {}
+      try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) {}
+      try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) {}
+      this.wakeTimerId = null
+      this.wakePollIntervalId = null
+      this.stalledHideTimeoutId = null
+      this.stalledFadeTimeoutId = null
+      this.isWaking = false
+      this.wakeTimedOut = false
+      // start with fading cleared so UI doesn't flash
+      this.stalledMessageFading = true
+      // ensure relics load after the fade completes
+      setTimeout(() => {
+        this.stalledMessageVisible = false
+        this.stalledMessageFading = false
+        this.loadRelics()
+      }, 300)
     },
 
     loadRelics() {
@@ -685,6 +741,16 @@ export default {
 .admin-panel {
   box-sizing: border-box;
   width: 100%;
+}
+/* Stalled wake message: visible when server hasn't responded after wakeDuration,
+   fades when the server becomes available. Keep styling lightweight to
+   respect page theme and existing layout. */
+.stalled-message {
+  transition: opacity 1s ease;
+  opacity: 1;
+}
+.stalled-message.fading {
+  opacity: 0;
 }
 </style>
 
