@@ -21,9 +21,11 @@
       </template>
       <template v-else>
         <div style="padding:10px 14px;color:#fff;font-weight:800">
-          <div style="font-size:18px;margin-bottom:8px">The curse is evaluating your worth…</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Do not interrupt the ritual.</div>
-          <div style="display:flex;align-items:center;gap:8px">
+            <div v-if="!stalledMessageVisible">
+              <div style="font-size:18px;margin-bottom:8px">The curse is evaluating your worth…</div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Do not interrupt the ritual.</div>
+            </div>
+          <div v-if="!stalledMessageVisible" style="display:flex;align-items:center;gap:8px">
             <div style="flex:1;background:rgba(255,255,255,0.04);height:12px;border-radius:8px;overflow:hidden">
               <div :style="{ width: Math.min(100, (wakeElapsed / wakeDuration) * 100) + '%', height:'100%', background:'linear-gradient(90deg,#9d6fff,#b48cff)' }"></div>
             </div>
@@ -233,8 +235,12 @@ export default {
     }
   },
     mounted() {
-      // Start wake/poll sequence on page load so Render/Heroku-style sleeping backends can start
-      this.startWakeSequence()
+      // Start wake/poll sequence on page load: first do a quick ping.
+      // If the server is already awake, skip the ritual UI and load relics immediately.
+      this.pingServer(1500).then(up => {
+        if (up) return this.loadRelics()
+        this.startWakeSequence()
+      }).catch(() => { this.startWakeSequence() })
     },
 
   watch: {
@@ -319,6 +325,18 @@ export default {
         this.verifyError = 'network_error'
         this.showFoundPopup = true
         this.foundRelicStatus = 'error'
+      }
+    },
+    // quick server ping with timeout (ms)
+    async pingServer(timeoutMs = 1500) {
+      try {
+        const controller = new AbortController()
+        const id = setTimeout(() => controller.abort(), timeoutMs)
+        const res = await fetch(this.fullApi('/api/relics'), { signal: controller.signal })
+        clearTimeout(id)
+        return res.ok
+      } catch (e) {
+        return false
       }
     },
     startWakeSequence() {
