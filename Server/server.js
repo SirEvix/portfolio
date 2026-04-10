@@ -84,6 +84,27 @@ app.get('/api/debug/persistence', async (req, res) => {
   }
 });
 
+// Debug: test Supabase REST connectivity and report a simple diagnostic
+app.get('/api/debug/supabase', async (req, res) => {
+  try {
+    const SUPABASE_URL = process.env.SUPABASE_URL || null;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || null;
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(400).json({ ok: false, reason: 'missing_env', SUPABASE_URL: !!SUPABASE_URL, SUPABASE_KEY: !!SUPABASE_SERVICE_KEY });
+    const REST_RELICS = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/relics`;
+    const hdr = { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` };
+    const start = Date.now();
+    const fetchRes = await fetch(`${REST_RELICS}?select=id&limit=1`, { headers: hdr, method: 'GET' });
+    const duration = Date.now() - start;
+    const ok = fetchRes && fetchRes.ok;
+    let body = null;
+    try { body = await fetchRes.json().catch(()=>null) } catch(e) { body = null }
+    return res.json({ ok, status: fetchRes ? fetchRes.status : null, duration_ms: duration, sample: Array.isArray(body) ? body.slice(0,1) : null, SUPABASE_REST: REST_RELICS });
+  } catch (e) {
+    console.error('/api/debug/supabase error', e);
+    return res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
 function findRelicByTokenHash(tokenHash) {
   return RELICS.find(r => r.token_hash === tokenHash) || null;
 }
