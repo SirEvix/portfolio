@@ -372,8 +372,10 @@ export default {
           const body = await res.json().catch(()=>null)
           if (res.ok && Array.isArray(body)) {
             // server is awake and responding
-            // show the transient post-awake message for 3s, fade, then finalize
-            // ensure message visible
+            // stop the poll immediately so the transient timers can run to completion
+            try { if (this.wakePollIntervalId) { clearInterval(this.wakePollIntervalId); this.wakePollIntervalId = null } } catch(e) { /* noop */ }
+            try { if (this.wakeTimerId) { clearInterval(this.wakeTimerId); this.wakeTimerId = null } } catch(e) { /* noop */ }
+            // show the transient post-awake message for 3s, then fade, then finalize
             this.stalledMessageVisible = true
             this.stalledMessageFading = false
             // clear any prior timeouts

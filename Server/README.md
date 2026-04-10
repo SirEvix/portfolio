@@ -1,5 +1,37 @@
 Server for Cursed Relics
 
+
+to change / verify relics access 
+https://florin-lica.com/cursed-relics?token=isadmin 
+pass is: florin-ADMIN-9f2b1c8d22-2026 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 What this server does (simple):
 - Stores the list of 500 relics and their status in a JSON file: `Server/data/relics.json`.
 - Exposes a small HTTP API (routes) your frontend can call to verify tokens and claim relics.
