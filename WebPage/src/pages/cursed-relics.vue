@@ -252,10 +252,10 @@ export default {
       try { const appEl = document.getElementById('app'); if (appEl) appEl.classList.remove('admin-visible') } catch(e) { /* noop */ }
     } catch(e) { /* noop */ }
       // clean up timers/timeouts
-      try { if (this.wakeTimerId) clearInterval(this.wakeTimerId) } catch(e) {}
-      try { if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId) } catch(e) {}
-      try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) {}
-      try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) {}
+      try { if (this.wakeTimerId) clearInterval(this.wakeTimerId) } catch(e) { /* noop */ }
+      try { if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId) } catch(e) { /* noop */ }
+      try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) { /* noop */ }
+      try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) { /* noop */ }
   },
   computed: {
     // grouped lists of relic ids per status for the admin summary UI
@@ -359,8 +359,8 @@ export default {
             this.stalledMessageVisible = true
             this.stalledMessageFading = false
             // clear any prior timeouts
-            try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) {}
-            try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) {}
+            try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) { /* noop */ }
+            try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) { /* noop */ }
             this.stalledHideTimeoutId = setTimeout(() => {
               this.stalledMessageFading = true
               this.stalledFadeTimeoutId = setTimeout(() => {
@@ -388,10 +388,10 @@ export default {
 
     finalizeAfterStall() {
       // stop polling and timers, reset stall flags, then load relics
-      try { if (this.wakeTimerId) clearInterval(this.wakeTimerId) } catch(e) {}
-      try { if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId) } catch(e) {}
-      try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) {}
-      try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) {}
+      try { if (this.wakeTimerId) clearInterval(this.wakeTimerId) } catch(e) { /* noop */ }
+      try { if (this.wakePollIntervalId) clearInterval(this.wakePollIntervalId) } catch(e) { /* noop */ }
+      try { if (this.stalledHideTimeoutId) clearTimeout(this.stalledHideTimeoutId) } catch(e) { /* noop */ }
+      try { if (this.stalledFadeTimeoutId) clearTimeout(this.stalledFadeTimeoutId) } catch(e) { /* noop */ }
       this.wakeTimerId = null
       this.wakePollIntervalId = null
       this.stalledHideTimeoutId = null
