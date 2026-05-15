@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Don't rewrite existing files or directories
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Route API clean paths to their PHP handlers (e.g. /api/relic/verify -> api/relic/verify.php)
+  RewriteRule ^api/(.*)$ api/$1.php [L,QSA]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Allow cross-origin requests if helpers do not set it (hosting may require this)
+  Header always set Access-Control-Allow-Origin "%{ENV:ALLOWED_ORIGIN}" env=ALLOWED_ORIGIN
+  Header always set Access-Control-Allow-Methods "GET,POST,OPTIONS"
+  Header always set Access-Control-Allow-Headers "Content-Type, x-admin-key, x-api-key, Authorization"
+</IfModule>
