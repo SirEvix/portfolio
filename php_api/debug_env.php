@@ -3,6 +3,9 @@ header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// Use the app config so the MySQL test uses the same credentials as the app.
+require_once __DIR__ . '/config.php';
+
 $report = [
     'ok' => false,
     'time' => date(DATE_ISO8601),
@@ -53,18 +56,13 @@ if (empty($report['has_pdo'])) {
         }
     }
 
-    // MySQL (use env or sensible defaults)
+    // MySQL — use the same constants as the application config.
     if (empty($report['has_pdo_mysql'])) {
         $pdoTests['mysql'] = 'pdo_mysql extension not available';
     } else {
-        $host = getenv('DB_HOST') ?: '127.0.0.1';
-        $port = getenv('DB_PORT') ?: '3306';
-        $name = getenv('DB_NAME') ?: 'relics_db';
-        $user = getenv('DB_USER') ?: 'root';
-        $pass = getenv('DB_PASS') ?: '';
         try {
-            $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
-            $p2 = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', DB_HOST, DB_PORT, DB_NAME);
+            $p2 = new PDO($dsn, DB_USER, DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
             $pdoTests['mysql'] = 'ok';
         } catch (Exception $e) {
             $pdoTests['mysql'] = $e->getMessage();

@@ -32,9 +32,55 @@ function update_relic_fields(int $id, array $fields) {
 }
 
 function list_relics() {
-    $pdo = get_pdo();
-    $stmt = $pdo->query('SELECT id, status, owner_name, owner_date FROM relics ORDER BY id');
-    return $stmt->fetchAll();
+    try {
+        $pdo = get_pdo();
+        $stmt = $pdo->query('SELECT id, status, owner_name, owner_date FROM relics ORDER BY id');
+        return $stmt->fetchAll();
+    } catch (Throwable $e) {
+        error_log('[php_api] list_relics DB error: ' . $e->getMessage());
+        // Fallback: read from data/relics.csv or data/relics.json
+        $dataDir = __DIR__ . '/../data';
+        $csv = $dataDir . '/relics.csv';
+        $json = $dataDir . '/relics.json';
+        $out = [];
+        if (is_readable($csv)) {
+            if (($f = fopen($csv, 'r')) !== false) {
+                $header = fgetcsv($f);
+                if ($header !== false) {
+                    $map = array_map('trim', $header);
+                    while (($row = fgetcsv($f)) !== false) {
+                        $rec = [];
+                        foreach ($map as $i => $col) {
+                            $val = $row[$i] ?? null;
+                            if ($val === '') $val = null;
+                            $rec[$col] = $val;
+                        }
+                        $out[] = [
+                            'id' => isset($rec['id']) ? (int)$rec['id'] : null,
+                            'status' => $rec['status'] ?? null,
+                            'owner_name' => $rec['owner_name'] ?? null,
+                            'owner_date' => $rec['owner_date'] ?? null,
+                        ];
+                    }
+                }
+                fclose($f);
+            }
+        } elseif (is_readable($json)) {
+            $txt = file_get_contents($json);
+            $arr = json_decode($txt, true);
+            if (is_array($arr)) {
+                foreach ($arr as $r) {
+                    $out[] = [
+                        'id' => isset($r['id']) ? (int)$r['id'] : null,
+                        'status' => $r['status'] ?? null,
+                        'owner_name' => $r['owner_name'] ?? null,
+                        'owner_date' => $r['owner_date'] ?? null,
+                    ];
+                }
+            }
+        }
+        return $out;
+    }
 }
 
 function persist_log_append(string $msg) {
@@ -79,9 +125,59 @@ function upsert_relic(array $r) {
 }
 
 function fetch_all_relics() {
-    $pdo = get_pdo();
-    $stmt = $pdo->query('SELECT id, token_hash, internal_code_hash, status, owner_name, owner_date FROM relics ORDER BY id');
-    return $stmt->fetchAll();
+    try {
+        $pdo = get_pdo();
+        $stmt = $pdo->query('SELECT id, token_hash, internal_code_hash, status, owner_name, owner_date FROM relics ORDER BY id');
+        return $stmt->fetchAll();
+    } catch (Throwable $e) {
+        error_log('[php_api] fetch_all_relics DB error: ' . $e->getMessage());
+        // Fallback to reading CSV/JSON and returning full records
+        $dataDir = __DIR__ . '/../data';
+        $csv = $dataDir . '/relics.csv';
+        $json = $dataDir . '/relics.json';
+        $out = [];
+        if (is_readable($csv)) {
+            if (($f = fopen($csv, 'r')) !== false) {
+                $header = fgetcsv($f);
+                if ($header !== false) {
+                    $map = array_map('trim', $header);
+                    while (($row = fgetcsv($f)) !== false) {
+                        $rec = [];
+                        foreach ($map as $i => $col) {
+                            $val = $row[$i] ?? null;
+                            if ($val === '') $val = null;
+                            $rec[$col] = $val;
+                        }
+                        $out[] = [
+                            'id' => isset($rec['id']) ? (int)$rec['id'] : null,
+                            'token_hash' => $rec['token_hash'] ?? null,
+                            'internal_code_hash' => $rec['internal_code_hash'] ?? null,
+                            'status' => $rec['status'] ?? null,
+                            'owner_name' => $rec['owner_name'] ?? null,
+                            'owner_date' => $rec['owner_date'] ?? null,
+                        ];
+                    }
+                }
+                fclose($f);
+            }
+        } elseif (is_readable($json)) {
+            $txt = file_get_contents($json);
+            $arr = json_decode($txt, true);
+            if (is_array($arr)) {
+                foreach ($arr as $r) {
+                    $out[] = [
+                        'id' => isset($r['id']) ? (int)$r['id'] : null,
+                        'token_hash' => $r['token_hash'] ?? null,
+                        'internal_code_hash' => $r['internal_code_hash'] ?? null,
+                        'status' => $r['status'] ?? null,
+                        'owner_name' => $r['owner_name'] ?? null,
+                        'owner_date' => $r['owner_date'] ?? null,
+                    ];
+                }
+            }
+        }
+        return $out;
+    }
 }
 
 ?>

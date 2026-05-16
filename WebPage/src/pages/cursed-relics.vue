@@ -282,12 +282,30 @@ export default {
         const envBase = process.env.VUE_APP_API_BASE
         if (envBase && envBase.length) return envBase.replace(/\/$/, '')
       } catch (e) { /* noop when env not available */ }
-      return 'https://relic-backend-oh7f.onrender.com'
+      return 'https://florin-lica.com/php_api'
     }, // configured API base
     fullApi(path) {
       // path should start with '/'
       const base = this.apiBase() || ''
-      return base ? `${base}${path}` : path
+      if (!base) return path
+
+      // When `.htaccess` is disabled on shared hosting, map clean API paths
+      // to their direct PHP handlers so requests do not rely on mod_rewrite.
+      const mapping = {
+        '/api/relics': '/api/relics/list.php',
+        '/api/relic/verify': '/api/relic/verify.php',
+        '/api/relic/claim': '/api/relic/claim.php',
+        '/api/relic/rename': '/api/relic/rename.php',
+        '/api/relic/update': '/api/relic/update.php'
+      }
+
+      for (const [k, v] of Object.entries(mapping)) {
+        if (path === k || path.startsWith(k + '?') || path.startsWith(k + '/')) {
+          return `${base}${v}${path.slice(k.length)}`
+        }
+      }
+
+      return `${base}${path}`
     },
     async verifyToken(token) {
       this.verifyError = null
