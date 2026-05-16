@@ -55,9 +55,17 @@ function get_persistence_status() {
 
 function upsert_relic(array $r) {
     $pdo = get_pdo();
-    $sql = 'INSERT INTO relics (id, token_hash, internal_code_hash, status, owner_name, owner_date)
-        VALUES (:id, :token_hash, :internal_code_hash, :status, :owner_name, :owner_date)
-        ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), internal_code_hash = VALUES(internal_code_hash), status = VALUES(status), owner_name = VALUES(owner_name), owner_date = VALUES(owner_date)';
+    // Use MySQL syntax when available, otherwise use SQLite upsert
+    if (defined('DB_DRIVER') && DB_DRIVER === 'mysql') {
+        $sql = 'INSERT INTO relics (id, token_hash, internal_code_hash, status, owner_name, owner_date)
+            VALUES (:id, :token_hash, :internal_code_hash, :status, :owner_name, :owner_date)
+            ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), internal_code_hash = VALUES(internal_code_hash), status = VALUES(status), owner_name = VALUES(owner_name), owner_date = VALUES(owner_date)';
+    } else {
+        // SQLite syntax: INSERT INTO ... ON CONFLICT(id) DO UPDATE SET ...
+        $sql = 'INSERT INTO relics (id, token_hash, internal_code_hash, status, owner_name, owner_date)
+            VALUES (:id, :token_hash, :internal_code_hash, :status, :owner_name, :owner_date)
+            ON CONFLICT(id) DO UPDATE SET token_hash=excluded.token_hash, internal_code_hash=excluded.internal_code_hash, status=excluded.status, owner_name=excluded.owner_name, owner_date=excluded.owner_date';
+    }
     $stmt = $pdo->prepare($sql);
     $params = [
         ':id' => $r['id'],

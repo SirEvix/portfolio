@@ -45,14 +45,14 @@ let Target3 = { x: 6, y: 2, z: 8 }; // Recenter target coordinates
 let CamPos3 = { x: 10, y: 8, z: 10 }; // Recenter camera position
 
 const models = [
-  '../assets/3dObjects/models/dbl1.glb',
-  '../assets/3dObjects/models/dbl2.glb',
-  '../assets/3dObjects/models/dbl3.glb',
-  '../assets/3dObjects/models/dbl4.glb',
-  '../assets/3dObjects/models/dbl5.glb',
-  '../assets/3dObjects/models/dbl6.glb',
-  '../assets/3dObjects/models/dbl7.glb',
-  '../assets/3dObjects/models/dbl8.glb'
+  '/assets/3dObjects/dbl1.glb',
+  '/assets/3dObjects/dbl2.glb',
+  '/assets/3dObjects/dbl3.glb',
+  '/assets/3dObjects/dbl4.glb',
+  '/assets/3dObjects/dbl5.glb',
+  '/assets/3dObjects/dbl6.glb',
+  '/assets/3dObjects/dbl7.glb',
+  '/assets/3dObjects/dbl8.glb'
 ];
 
 let currentModelIndex = -1;
@@ -356,11 +356,16 @@ export default {
         currentModelIndex = (currentModelIndex - 1 + models.length) % models.length;
       }
       const loader = new GLTFLoader();
-      loader.load(models[currentModelIndex], (gltf) => {
+      const modelUrl = models[currentModelIndex];
+      console.log('Loading model URL:', modelUrl);
+      loader.load(modelUrl, (gltf) => {
         currentModel = gltf.scene;
         currentModel.position.set(2.1, 2.7, -1.5);
         currentModel.scale.set(0.2, 0.2, 0.2);
         this.scene.add(currentModel);
+        this.loading = false;
+      }, undefined, (error) => {
+        console.error('Error loading model:', modelUrl, error);
         this.loading = false;
       });
     },
