@@ -1,11 +1,12 @@
-# Minimal, host-safe .htaccess for php_api
-# Only include a conservative rewrite rule; avoid Header and other
-# directives that can trigger 500 errors on some shared hosts.
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /php_api/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^api/(.*)$ api/$1.php [L,QSA]
 </IfModule>
 
-# If you still see 500 errors, temporarily rename this file to
-# .htaccess.disabled and re-test (you mentioned that helped earlier).
+# Minimal rewrite: maps /api/<path> to api/<path>.php only when the
+# requested path is not an existing file or directory. No other directives
+# (Headers/AddHandler/RewriteBase) are included to avoid 500 errors on
+# restrictive shared hosts. If this still triggers a 500, remove/disable
+# this file and call the PHP endpoints directly (they work without rewrites).

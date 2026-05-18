@@ -98,7 +98,7 @@
           <div style="font-size:13px;margin-bottom:6px;color:var(--muted)">Want to change your name?</div>
           <input v-model="renameNameInput" placeholder="New name (1-15 chars, letters+numbers only)" />
           <div class="controls">
-            <button @click="renameOwner" :disabled="!validateName(renameNameInput)">Rename</button>
+            <button type="button" @click="renameOwner" :disabled="!validateName(renameNameInput)">Rename</button>
             <button @click="closeFoundPopup">Cancel</button>
           </div>
         </div>
@@ -448,7 +448,8 @@ export default {
 
     loadRelics() {
       // Prefer authoritative server state: try /api/relics on configured API base, then fallback to bundled assets, then generated mock
-      fetch(this.fullApi('/api/relics'))
+      // Return the promise so callers can await a full refresh.
+      return fetch(this.fullApi('/api/relics'))
         .then(r => {
           // only accept successful JSON responses that are arrays
           if (!r.ok) throw new Error('bad_response')
@@ -711,6 +712,15 @@ export default {
           this.heroOverlay.center = ''
         }
         this.showFoundPopup = false
+        // clear token from URL so popup won't reopen on refresh
+        try {
+          const url = new URL(window.location);
+          url.searchParams.delete('token');
+          window.history.replaceState({}, '', url);
+        } catch(e) { /* noop */ }
+        this.foundToken = null;
+        // refresh authoritative list so other clients see the change immediately
+        try { await this.loadRelics() } catch(e) { /* noop if refresh fails */ }
       } catch(e) {
         console.error('rename error', e)
         this.verifyError = 'network_error'

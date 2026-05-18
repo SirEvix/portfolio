@@ -38,7 +38,7 @@ function get_pdo() {
     if (DB_USER !== '' && DB_NAME !== '') {
         try {
             $pdo = new PDO($mysqlDsn, DB_USER, DB_PASS, $opts);
-            define('DB_DRIVER', 'mysql');
+            if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
             return $pdo;
         } catch (Exception $e) {
             error_log('[php_api] MySQL connection failed: ' . $e->getMessage());
@@ -53,7 +53,7 @@ function get_pdo() {
     $dataDir = dirname($sqlitePath);
     if (!is_dir($dataDir)) @mkdir($dataDir, 0755, true);
     $pdo = new PDO($sqliteDsn, null, null, $opts);
-    define('DB_DRIVER', 'sqlite');
+    if (!defined('DB_DRIVER')) define('DB_DRIVER', 'sqlite');
     // Initialize schema if needed
     $pdo->exec("CREATE TABLE IF NOT EXISTS relics (
                 id INTEGER PRIMARY KEY,
