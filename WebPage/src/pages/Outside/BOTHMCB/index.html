@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <title>Blood on the Heavy Metal Chess Board</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <main>
+    <section id="installScreen" class="screen">
+      <div class="install-inner">
+        <h1>Blood on the Heavy Metal Chess Board</h1>
+        <p class="lead">Add to Home Screen to Play</p>
+        <button id="installBtn" class="btn-large">Install</button>
+      </div>
+
+      <div id="installOverlay" class="overlay hidden">
+        <div class="overlay-content">
+          <h2>How to Install</h2>
+          <ol>
+            <li>Open the browser menu (⋯ or Share)</li>
+            <li>Choose "Add to Home Screen" or "Install"</li>
+            <li>Launch the app from your home screen</li>
+          </ol>
+          <button id="closeOverlay" class="btn">Got it</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen hidden">
+      <header class="game-header">
+        <h2>Blood on the Heavy Metal Chess Board</h2>
+      </header>
+
+      <div class="game-body">
+        <div id="goalDisplay" aria-hidden="true" style="width:100%;max-width:600px;margin-bottom:8px;color:var(--muted);text-align:center">Goal: (not generated)</div>
+
+        <div class="board-placeholder" aria-hidden="true">
+          <div id="board" class="board-inner">Chess Board Placeholder</div>
+        </div>
+
+        <div id="movesDisplay" style="width:100%;max-width:600px;margin-top:8px;text-align:center;color:var(--muted)">Remaining Moves: 0</div>
+
+        <div class="controls">
+          <button id="rotateBtn" class="control">Rotate 90°</button>
+          <button id="mirrorHBtn" class="control">Mirror H</button>
+          <button id="mirrorVBtn" class="control">Mirror V</button>
+          <button id="newGoalBtn" class="control">New Goal</button>
+          <button id="declareBtn" class="control">Declare Moves</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>

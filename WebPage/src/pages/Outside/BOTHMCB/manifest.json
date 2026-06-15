@@ -1,0 +1,10 @@
+{
+  "name": "Blood on the Heavy Metal Chess Board",
+  "short_name": "Heavy Metal Chess",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070707",
+  "theme_color": "#111111",
+  "description": "A minimal mobile-first PWA placeholder for Blood on the Heavy Metal Chess Board",
+  "icons": []
+}
