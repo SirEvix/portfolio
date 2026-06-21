@@ -89,8 +89,10 @@ body{
 .board-placeholder{
   width:100%;
   max-width:500px;
-  flex:1 1 0; /* lets it grow/shrink exactly to the available height */
-  min-height:0;
+  max-height: 55vh; /* Enforces height boundary so it never has to squash */
+  flex: 0 1 auto; /* Stop flex-grow from illegally forcing height without respecting aspect-ratio */
+  aspect-ratio:1/1;
+  margin: auto;
   border:3px solid #222;
   background:linear-gradient(135deg,#151515,#0e0e10);
   display:flex;
