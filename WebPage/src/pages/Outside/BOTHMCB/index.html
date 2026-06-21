@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#111111">
   <title>Blood on the Heavy Metal Chess Board</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -37,25 +37,45 @@
       </header>
 
       <div class="game-body">
-        <div id="goalDisplay" aria-hidden="true" style="width:100%;max-width:600px;margin-bottom:8px;color:var(--muted);text-align:center">Goal: (not generated)</div>
+        
+        <div id="bigMovesDisplay" class="hidden" style="font-size:4rem; font-weight:bold; color:var(--accent); margin:10px 0;">0</div>
+
+        <div id="goalGrid" aria-hidden="true" style="width:100%;max-width:25vh;max-height:25vh;aspect-ratio:1/1;margin:0 auto 8px auto;color:var(--muted);text-align:center;display:flex;flex-direction:column;gap:4px"> 
+          <!-- goalGrid will be rendered as a 3x3 grid by script.js -->
+        </div>
+
+        <div id="setupPanel" style="width:100%; max-width:600px; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:8px; align-items:center;">
+          <div style="font-size:0.9rem; text-align:center;">How many moves do you need to match this goal?</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="bidDownBtn" class="control" style="width:40px; padding:4px;">-</button>
+            <input id="bidInput" type="number" value="10" min="1" style="width:50px; text-align:center; font-size:1.1rem; padding:4px; background:#222; color:var(--text); border:1px solid #444; border-radius:4px;"/>
+            <button id="bidUpBtn" class="control" style="width:40px; padding:4px;">+</button>
+          </div>
+
+          <div class="controls" style="margin-top:2px;">
+            <button id="rotateBtn" class="control">Rotate 90°</button>
+            <button id="mirrorHBtn" class="control">Mirror H</button>
+            <button id="mirrorVBtn" class="control">Mirror V</button>
+            <button id="newGoalBtn" class="control">New Goal</button>
+          </div>
+
+          <div style="font-size:0.8rem; color:var(--muted); text-align:center;">
+            Modifying the goal adds +1 move penalty per change!<br/>
+            <span style="color:var(--text); font-weight:bold;">Penalty Points Added: <span id="penaltyDisplay">0</span></span>
+          </div>
+
+          <button id="playBtn" class="btn-large" style="width:100%; max-width:200px; margin-top:2px; padding:10px 16px;">PLAY</button>
+        </div>
 
         <div class="board-placeholder" aria-hidden="true">
           <div id="board" class="board-inner">Chess Board Placeholder</div>
         </div>
 
-        <div id="movesDisplay" style="width:100%;max-width:600px;margin-top:8px;text-align:center;color:var(--muted)">Remaining Moves: 0</div>
-
-        <div class="controls">
-          <button id="rotateBtn" class="control">Rotate 90°</button>
-          <button id="mirrorHBtn" class="control">Mirror H</button>
-          <button id="mirrorVBtn" class="control">Mirror V</button>
-          <button id="newGoalBtn" class="control">New Goal</button>
-          <button id="declareBtn" class="control">Declare Moves</button>
-        </div>
+        <div id="winCounterDisplay" style="font-size:0.85rem; color:var(--muted); margin-bottom:4px; text-align:center; line-height:1.4;">Cards Matched: 0</div>
       </div>
     </section>
   </main>
 
-  <script src="./script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

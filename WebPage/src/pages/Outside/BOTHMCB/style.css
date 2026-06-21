@@ -8,6 +8,8 @@
 }
 html,body,#app{
   height:100%;
+  overflow:hidden;
+  touch-action:none;
 }
 body{
   margin:0;
@@ -17,12 +19,14 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .screen{
-  min-height:100vh;
+  height:100vh;
+  height:100dvh;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
+  padding:10px;
   box-sizing:border-box;
+  overflow:hidden;
 }
 .hidden{display:none}
 
@@ -74,38 +78,61 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:14px;
-  padding:80px 16px 24px 16px; /* leave space for header */
+  justify-content:space-between;
+  gap:8px;
+  width:100%;
+  height:100%;
+  box-sizing:border-box;
+  padding:50px 8px 12px 8px; /* leave space for header */
 }
 
 .board-placeholder{
-  width:min(95vw,600px);
-  height:60vw; /* intentionally not perfectly square to satisfy requirement */
-  max-height:600px;
-  border:4px solid #222;
+  width:100%;
+  max-width:500px;
+  flex:1 1 0; /* lets it grow/shrink exactly to the available height */
+  min-height:0;
+  border:3px solid #222;
   background:linear-gradient(135deg,#151515,#0e0e10);
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   border-radius:8px;
   color:var(--muted);
+  overflow:hidden;
 }
-.board-inner{font-size:0.95rem}
+.board-inner{
+  font-size:0.95rem;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
 
 .controls{
   display:flex;
-  gap:8px;
+  flex-wrap:wrap;
+  gap:6px;
   width:100%;
-  max-width:600px;
+  max-width:500px;
   justify-content:center;
 }
 .control{
   flex:1 1 auto;
-  padding:10px 12px;
+  padding:8px 8px;
   border-radius:8px;
   border:0;
   background:#222;
   color:var(--text);
+  font-size:0.9rem;
+}
+
+.piece-svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  margin: auto;
 }
 
 @media (min-width:420px){
