@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // For production builds you can uncomment and set to null or remove this line.
   // Example (uncomment to force game view while testing):
   // const TEST_FORCE_STANDALONE = true;
-   const TEST_FORCE_STANDALONE = true;
+   const TEST_FORCE_STANDALONE = null;
 
   // Game state
   let phase = 'setup'; // 'setup' | 'play'
