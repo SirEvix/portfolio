@@ -31,10 +31,87 @@
       </div>
     </section>
 
+    <section id="homeScreen" class="screen hidden">
+      <div class="home-inner" style="text-align:center; display:flex; flex-direction:column; gap:16px; width:100%; max-width:400px; padding:20px;">
+        <h1 style="font-size:1.8rem; margin:0 0 10px 0;">Blood on the Heavy Metal Chess Board</h1>
+
+        <div class="profile-box">
+          <h3>Player Profile</h3>
+          <div class="profile-stat"><span>Cards Played:</span> <span id="homeTotalCards">0</span></div>
+          <div class="profile-stat"><span>Overall Accuracy:</span> <span id="homeOverallAcc">0%</span></div>
+          <div class="profile-stat"><span>Best Streak:</span> <span id="homeBestStreak">0</span></div>
+        </div>
+
+        <button id="playGameBtn" class="btn-large">PLAY</button>
+        <button id="settingsBtn" class="btn-large" style="background:#333;">SETTINGS</button>
+        
+        <div style="margin-top:20px; font-size:0.8rem; color:var(--muted);">
+          <div>Ver: <span id="versionLabel">0.001</span></div>
+          <button id="updateBtn" class="btn" style="margin-top:8px;">Check for update</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="settingsScreen" class="screen hidden">
+      <div class="settings-inner" style="text-align:left; display:flex; flex-direction:column; gap:16px; width:100%; max-width:400px; padding:20px; background:var(--card); border-radius:12px;">
+        <h2 style="margin:0; text-align:center;">Settings</h2>
+
+        <div class="settings-row">
+          <label>Music</label>
+          <input type="checkbox" id="musicToggle" checked>
+        </div>
+        <div class="settings-row">
+          <label>Music Volume</label>
+          <input type="range" id="musicVolume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+
+        <hr style="border:1px solid #333; width:100%;">
+
+        <div class="settings-row">
+          <label>SFX</label>
+          <input type="checkbox" id="sfxToggle" checked>
+        </div>
+        <div class="settings-row">
+          <label>SFX Volume</label>
+          <input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+
+        <hr style="border:1px solid #333; width:100%;">
+
+        <button id="deleteDataBtn" class="btn-large" style="background:var(--accent);">Delete All Data</button>
+        <button id="backToHomeBtn" class="btn-large" style="background:#333;">Back to Menu</button>
+      </div>
+    </section>
+
     <section id="gameScreen" class="screen hidden">
+      <button id="quickSettingsBtn" style="position:absolute; top:8px; right:8px; z-index:9999; border:none; background:rgba(0,0,0,0.5); color:var(--text); font-size:1.4rem; padding:4px 8px; border-radius:8px; cursor:pointer;">⚙</button>
       <header class="game-header">
         <h2>Blood on the Heavy Metal Chess Board</h2>
       </header>
+
+      <div id="quickSettingsOverlay" class="overlay hidden" style="z-index:10000;">
+        <div class="overlay-content">
+          <h2 style="text-align:center; margin-bottom:16px;">Quick Settings</h2>
+          <div class="settings-row">
+            <label>Music</label>
+            <input type="checkbox" id="quickMusicToggle">
+          </div>
+          <div class="settings-row">
+            <label>Music Volume</label>
+            <input type="range" id="quickMusicVolume" min="0" max="1" step="0.1">
+          </div>
+          <hr style="border:1px solid #333; width:100%; margin:12px 0;">
+          <div class="settings-row">
+            <label>SFX</label>
+            <input type="checkbox" id="quickSfxToggle">
+          </div>
+          <div class="settings-row">
+            <label>SFX Volume</label>
+            <input type="range" id="quickSfxVolume" min="0" max="1" step="0.1">
+          </div>
+          <button id="closeQuickSettingsBtn" class="btn-large" style="width:100%; margin-top:20px; background:#333;">Close</button>
+        </div>
+      </div>
 
       <div class="game-body">
         
@@ -42,6 +119,22 @@
 
         <div id="goalGrid" aria-hidden="true" style="width:100%;max-width:20vh;max-height:20vh;aspect-ratio:1/1;margin:0 auto 8px auto;color:var(--muted);text-align:center;display:flex;flex-direction:column;gap:4px"> 
           <!-- goalGrid will be rendered as a 3x3 grid by script.js -->
+        </div>
+        <div id="winPopup" class="popup hidden">
+          <div class="popup-inner">
+            <h2 id="winTitle">YOU WIN!</h2>
+            <p id="winRank"></p>
+            <p id="winScore"></p>
+            <button id="winOkBtn" class="btn-large">OK</button>
+          </div>
+        </div>
+
+        <div id="losePopup" class="popup hidden">
+          <div class="popup-inner">
+            <h2 id="loseTitle">YOU LOSE!</h2>
+            <p id="loseText">No moves left. Try another card.</p>
+            <button id="loseOkBtn" class="btn-large">OK</button>
+          </div>
         </div>
 
         <div id="setupPanel" class="setup-panel">

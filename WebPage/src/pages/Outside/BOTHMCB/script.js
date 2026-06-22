@@ -1,6 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
  const installScreen = document.getElementById('installScreen');
   const gameScreen = document.getElementById('gameScreen');
+  const homeScreen = document.getElementById('homeScreen');
+  const settingsScreen = document.getElementById('settingsScreen');
+  const playGameBtn = document.getElementById('playGameBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const backToHomeBtn = document.getElementById('backToHomeBtn');
+  const updateBtn = document.getElementById('updateBtn');
+  const versionLabel = document.getElementById('versionLabel');
+  const deleteDataBtn = document.getElementById('deleteDataBtn');
+  
+  const musicToggle = document.getElementById('musicToggle');
+  const sfxToggle = document.getElementById('sfxToggle');
+  const musicVolumeInput = document.getElementById('musicVolume');
+  const sfxVolumeInput = document.getElementById('sfxVolume');
+  
+  const quickSettingsBtn = document.getElementById('quickSettingsBtn');
+  const quickSettingsOverlay = document.getElementById('quickSettingsOverlay');
+  const closeQuickSettingsBtn = document.getElementById('closeQuickSettingsBtn');
+  const quickMusicToggle = document.getElementById('quickMusicToggle');
+  const quickSfxToggle = document.getElementById('quickSfxToggle');
+  const quickMusicVolumeInput = document.getElementById('quickMusicVolume');
+  const quickSfxVolumeInput = document.getElementById('quickSfxVolume');
+  
+  const homeTotalCards = document.getElementById('homeTotalCards');
+  const homeOverallAcc = document.getElementById('homeOverallAcc');
+  const homeBestStreak = document.getElementById('homeBestStreak');
+  
   const installBtn = document.getElementById('installBtn');
   const overlay = document.getElementById('installOverlay');
   const closeOverlay = document.getElementById('closeOverlay');
@@ -20,6 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const playBtn = document.getElementById('playBtn');
   const bigMovesDisplay = document.getElementById('bigMovesDisplay');
   const winCounterDisplay = document.getElementById('winCounterDisplay');
+  const winPopup = document.getElementById('winPopup');
+  const winRankText = document.getElementById('winRank');
+  const winScoreText = document.getElementById('winScore');
+  const winOkBtn = document.getElementById('winOkBtn');
+  const losePopup = document.getElementById('losePopup');
+  const loseOkBtn = document.getElementById('loseOkBtn');
 
   // Testing override:
   // Set to `true` to force standalone/gameScreen, `false` to force installScreen,
@@ -27,7 +59,224 @@ document.addEventListener('DOMContentLoaded', () => {
   // For production builds you can uncomment and set to null or remove this line.
   // Example (uncomment to force game view while testing):
   // const TEST_FORCE_STANDALONE = true;
-   const TEST_FORCE_STANDALONE = true;
+   const TEST_FORCE_STANDALONE = null;
+   const APP_VERSION = "0.002";
+
+  // Data & Settings state
+  let longestStreak = 0;
+  let totalCards = 0;
+  let totalAccuracySum = 0;
+  let currentStreak = 0;
+  
+  let musicEnabled = true;
+  let sfxEnabled = true;
+  let musicVolume = 0.5;
+  let sfxVolume = 0.5;
+
+  const musicMenu = new Audio('sound/menu_music.mp3');
+  const musicGame = new Audio('sound/game_music.mp3');
+  musicMenu.loop = true;
+  musicGame.loop = true;
+
+  const sfxMove = new Audio('sound/move.wav');
+  const sfxWin = new Audio('sound/win.wav');
+  const sfxLose = new Audio('sound/lose.wav');
+  const sfxRotate = new Audio('sound/rotate.wav');
+  const sfxMirrorH = new Audio('sound/mirrorH.wav');
+  const sfxMirrorV = new Audio('sound/mirrorV.wav');
+  const sfxNewGoal = new Audio('sound/newGoal.wav');
+
+  function startMenuMusic() {
+      musicGame.pause();
+      musicGame.currentTime = 0;
+      if (musicEnabled && musicMenu.paused) {
+          musicMenu.volume = musicVolume;
+          musicMenu.play().catch(e=>{});
+      }
+  }
+
+  function stopMenuMusic() {
+      musicMenu.pause();
+  }
+
+  function startGameMusic() {
+      musicMenu.pause();
+      musicMenu.currentTime = 0;
+      if (musicEnabled && musicGame.paused) {
+          musicGame.volume = musicVolume;
+          musicGame.play().catch(e=>{});
+      }
+  }
+
+  function stopGameMusic() {
+      musicGame.pause();
+  }
+
+  function applyMusicSettings() {
+      musicMenu.volume = musicVolume;
+      musicGame.volume = musicVolume;
+      if (!musicEnabled) {
+          musicMenu.pause();
+          musicGame.pause();
+      } else {
+          if (!gameScreen.classList.contains('hidden')) {
+              musicMenu.pause(); // definitively mute the other channel
+              if (musicGame.paused) musicGame.play().catch(e=>{});
+          } else if (!homeScreen.classList.contains('hidden') || !settingsScreen.classList.contains('hidden')) {
+              musicGame.pause(); // definitively mute the other channel
+              if (musicMenu.paused) musicMenu.play().catch(e=>{});
+          } else {
+              musicMenu.pause();
+              musicGame.pause();
+          }
+      }
+  }
+
+  function playMove() {
+      if (sfxEnabled) { sfxMove.volume = sfxVolume; sfxMove.currentTime = 0; sfxMove.play().catch(e=>{}); }
+  }
+  function playWin() {
+      if (sfxEnabled) { sfxWin.volume = sfxVolume; sfxWin.currentTime = 0; sfxWin.play().catch(e=>{}); }
+  }
+  function playLose() {
+      if (sfxEnabled) { sfxLose.volume = sfxVolume; sfxLose.currentTime = 0; sfxLose.play().catch(e=>{}); }
+  }
+  function playRotate() {
+      if (sfxEnabled) { sfxRotate.volume = sfxVolume; sfxRotate.currentTime = 0; sfxRotate.play().catch(e=>{}); }
+  }
+  function playMirrorH() {
+      if (sfxEnabled) { sfxMirrorH.volume = sfxVolume; sfxMirrorH.currentTime = 0; sfxMirrorH.play().catch(e=>{}); }
+  }
+  function playMirrorV() {
+      if (sfxEnabled) { sfxMirrorV.volume = sfxVolume; sfxMirrorV.currentTime = 0; sfxMirrorV.play().catch(e=>{}); }
+  } 
+  function playNewGoal() {
+      if (sfxEnabled) { sfxNewGoal.volume = sfxVolume; sfxNewGoal.currentTime = 0; sfxNewGoal.play().catch(e=>{}); }
+  }
+
+    function showWinPopup(rank, accuracyPercent, cardScore) {
+      if (winRankText) winRankText.textContent = `Rank: ${rank} (${accuracyPercent}%)`;
+      if (winScoreText) winScoreText.textContent = `Card Score: ${cardScore}`;
+      winPopup?.classList.remove('hidden');
+    }
+
+    function hideWinPopup() {
+      winPopup?.classList.add('hidden');
+    }
+
+    function showLosePopup() {
+      losePopup?.classList.remove('hidden');
+    }
+
+    function hideLosePopup() {
+      losePopup?.classList.add('hidden');
+    }
+
+    function finalizeWinRound() {
+      phase = 'setup';
+      setupPanel.classList.remove('hidden');
+      setTimeout(() => {
+      setupPanel.classList.remove('fade-out');
+      }, 10);
+      bigMovesDisplay.classList.add('hidden');
+      generateRandomGoal();
+      pendingResult = null;
+      hideWinPopup();
+      showHome();
+    }
+
+    function finalizeLoseRound() {
+      winCount = 0;
+      totalAccuracy = 0;
+      if (winCounterDisplay) winCounterDisplay.textContent = `Cards Matched: 0`;
+
+      phase = 'setup';
+      setupPanel.classList.remove('hidden');
+      setTimeout(() => {
+      setupPanel.classList.remove('fade-out');
+      }, 10);
+      bigMovesDisplay.classList.add('hidden');
+      generateRandomGoal();
+      randomizeBoard();
+      pendingResult = null;
+      hideLosePopup();
+      showHome();
+    }
+
+  function syncSettingsUI() {
+      if(musicToggle) musicToggle.checked = musicEnabled;
+      if(quickMusicToggle) quickMusicToggle.checked = musicEnabled;
+      if(sfxToggle) sfxToggle.checked = sfxEnabled;
+      if(quickSfxToggle) quickSfxToggle.checked = sfxEnabled;
+      
+      if(musicVolumeInput) musicVolumeInput.value = musicVolume;
+      if(quickMusicVolumeInput) quickMusicVolumeInput.value = musicVolume;
+      if(sfxVolumeInput) sfxVolumeInput.value = sfxVolume;
+      if(quickSfxVolumeInput) quickSfxVolumeInput.value = sfxVolume;
+  }
+
+  function updateSettings(type, val) {
+      if (type === 'musicToggle') musicEnabled = val;
+      if (type === 'sfxToggle') sfxEnabled = val;
+      if (type === 'musicVolume') musicVolume = parseFloat(val);
+      if (type === 'sfxVolume') sfxVolume = parseFloat(val);
+      
+      syncSettingsUI();
+      saveData();
+      applyMusicSettings();
+  }
+
+  function loadData() {
+      const data = JSON.parse(localStorage.getItem('BOTHMCB_SAVE')) || {};
+      longestStreak = data.longestStreak || 0;
+      totalCards = data.totalCards || 0;
+      totalAccuracySum = data.totalAccuracySum || 0;
+      
+      musicEnabled = data.musicEnabled !== undefined ? data.musicEnabled : true;
+      sfxEnabled = data.sfxEnabled !== undefined ? data.sfxEnabled : true;
+      musicVolume = data.musicVolume !== undefined ? data.musicVolume : 0.5;
+      sfxVolume = data.sfxVolume !== undefined ? data.sfxVolume : 0.5;
+      
+      syncSettingsUI();
+      applyMusicSettings();
+      updateHomeStats();
+  }
+
+  function saveData() {
+      localStorage.setItem('BOTHMCB_SAVE', JSON.stringify({
+          longestStreak, totalCards, totalAccuracySum, musicEnabled, sfxEnabled, musicVolume, sfxVolume
+      }));
+  }
+
+  function resetData() {
+      localStorage.removeItem('BOTHMCB_SAVE');
+      currentStreak = 0;
+      loadData();
+      alert("All data deleted!");
+  }
+
+  function updateHomeStats() {
+      const acc = totalCards > 0 ? Math.round((totalAccuracySum / totalCards) * 100) : 0;
+      if (homeTotalCards) homeTotalCards.textContent = totalCards;
+      if (homeOverallAcc) homeOverallAcc.textContent = acc + '%';
+      if (homeBestStreak) homeBestStreak.textContent = longestStreak;
+      
+      if (versionLabel) versionLabel.textContent = APP_VERSION;
+  }
+
+  async function checkForUpdate() {
+      try {
+          const res = await fetch('https://florin-lica.com/Outside/BOTHMCB/version.json');
+          const data = await res.json();
+          if (parseFloat(data.version) > parseFloat(APP_VERSION)) {
+              alert('New version available!');
+          } else {
+              alert('You are up to date');
+          }
+      } catch(e) {
+          alert('Could not check for updates');
+      }
+  }
 
   // Game state
   let phase = 'setup'; // 'setup' | 'play'
@@ -60,8 +309,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let selectedCell = null; // {r,c}
   let possibleMoves = [];
+  let gameInputUnlockAt = 0;
 
   let totalAccuracy = 0;
+  let pendingResult = null; // 'win' | 'lose' | null
 
   // Goal pieces (5-piece card)
   let goalPieces = [0,0,0,0,0];
@@ -441,25 +692,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (phase !== 'setup') return;
     rotateState = (rotateState + 1) % 4;
     applyTransforms();
+    playRotate(); // play sound effect for rotation
   }
 
   function mirrorGoalHorizontal(){
     if (phase !== 'setup') return;
     mirrorHState = (mirrorHState + 1) % 2;
     applyTransforms();
+    playMirrorH(); // play sound effect for horizontal mirror
   }
 
   function mirrorGoalVertical(){
     if (phase !== 'setup') return;
     mirrorVState = (mirrorVState + 1) % 2;
     applyTransforms();
+    playMirrorV(); // play sound effect for vertical mirror
   }
 
   // Play Initialization
   function startPlay(){
+    if (Date.now() < gameInputUnlockAt) return;
     if (phase !== 'setup') return;
-    const baseBids = parseInt(bidInput.value, 10) || 10;
-    declaredMoves = baseBids + getPenalty();
+    const parsedBid = parseInt(bidInput.value, 10);
+    const baseBids = Number.isFinite(parsedBid) ? parsedBid : 10;
+    declaredMoves = Math.max(1, baseBids + getPenalty());
     remainingMoves = declaredMoves;
     
     // Switch to play phase
@@ -480,13 +736,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function consumeMove(){
-    if (remainingMoves>0) remainingMoves--;
-    bigMovesDisplay.textContent = remainingMoves;
+    remainingMoves--;
+    bigMovesDisplay.textContent = Math.max(0, remainingMoves);
     checkWinCondition();
   }
 
   // Cell interactions
   function onCellClick(r,c){
+    if (Date.now() < gameInputUnlockAt) return;
     if (phase !== 'play') return; // Cannot move during setup
 
     if (!selectedCell){
@@ -504,6 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // allow swap only if target is empty and is in possibleMoves
     const isPossibleIndex = possibleMoves.some(pm=>pm[0]===r && pm[1]===c);
     if (isPossibleIndex && board[r][c]===0){
+      playMove();
       const sr = selectedCell.r, sc = selectedCell.c;
       const tmp = board[sr][sc];
       board[sr][sc] = board[r][c];
@@ -512,7 +770,6 @@ document.addEventListener('DOMContentLoaded', () => {
       possibleMoves = [];
       consumeMove();
       renderBoard(board);
-      checkWinCondition();
       return;
     }
     // otherwise deselect
@@ -551,12 +808,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
       totalAccuracy += acc;
       winCount++;
-      const overallAcc = totalAccuracy / winCount;
+      
+      currentStreak++;
+      totalCards++;
+      totalAccuracySum += acc;
+      if (currentStreak > longestStreak) longestStreak = currentStreak;
+      saveData();
+      updateHomeStats();
+      playWin();
+
+      const overallAcc = totalAccuracySum / totalCards;
 
       const lastRank = getRank(acc);
       const overallRank = getRank(overallAcc);
 
-      alert(`YOU WIN!\n\nRank: ${lastRank} (${Math.round(acc*100)}%)\nCard Score: ${Math.floor(100 * acc)}`);
+        phase = 'result';
+        pendingResult = 'win';
+        showWinPopup(lastRank, Math.round(acc*100), Math.floor(100 * acc));
+
       
       if (winCounterDisplay) {
         winCounterDisplay.innerHTML = `
@@ -566,34 +835,22 @@ document.addEventListener('DOMContentLoaded', () => {
 `;
 
       }
-      
-      // Setup phase for new card, play area remains as is
-  phase = 'setup';
-
-  // show panel again (but still transparent)
-  setupPanel.classList.remove('hidden');
-
-  // allow browser to apply display:block before removing fade-out
-  setTimeout(() => {
-    setupPanel.classList.remove('fade-out');
-  }, 10);
-
-  bigMovesDisplay.classList.add('hidden');
-  generateRandomGoal();
-  return true;
+      return true;
 
     }
     if (remainingMoves<=0){
-      alert('YOU LOSE!');
-      // Reset everything
-      winCount = 0;
-      totalAccuracy = 0;
-      if (winCounterDisplay) winCounterDisplay.textContent = `Cards Matched: 0`;
-      phase = 'setup';
-      setupPanel.classList.remove('hidden');
-      bigMovesDisplay.classList.add('hidden');
-      generateRandomGoal();
-      randomizeBoard();
+      playLose();
+      
+      currentStreak = 0;
+      totalCards++;
+      // Loss acts as a 0 on accuracy, so totalAccuracySum stays perfectly intact 
+      // but is divided by higher totalCards lowering the overall average.
+      saveData();
+      updateHomeStats();
+      
+      phase = 'result';
+      pendingResult = 'lose';
+      showLosePopup();
       return false;
     }
     return null;
@@ -607,14 +864,15 @@ document.addEventListener('DOMContentLoaded', () => {
       bidInput.value = val; 
   });
 
-  rotateBtn?.addEventListener('click', rotateGoal90);
-  mirrorHBtn?.addEventListener('click', mirrorGoalHorizontal);
-  mirrorVBtn?.addEventListener('click', mirrorGoalVertical);
+  rotateBtn?.addEventListener('click', () => { rotateGoal90(); playRotate(); });
+  mirrorHBtn?.addEventListener('click', () => { mirrorGoalHorizontal(); playMirrorH(); });
+  mirrorVBtn?.addEventListener('click', () => { mirrorGoalVertical(); playMirrorV(); });
   newGoalBtn?.addEventListener('click', () => { 
       if (phase === 'setup') {
           generateRandomGoal(); 
           randomizeBoard();
       }
+                playNewGoal(); // play sound effect for new goal
   });
   playBtn?.addEventListener('click', startPlay);
 
@@ -624,15 +882,93 @@ document.addEventListener('DOMContentLoaded', () => {
   generateRandomGoal();
   randomizeBoard();
 
+  if (updateBtn) updateBtn.addEventListener('click', checkForUpdate);
+  if (deleteDataBtn) deleteDataBtn.addEventListener('click', resetData);
+  
+  if (musicToggle) musicToggle.addEventListener('change', (e) => updateSettings('musicToggle', e.target.checked));
+  if (quickMusicToggle) quickMusicToggle.addEventListener('change', (e) => updateSettings('musicToggle', e.target.checked));
+  if (sfxToggle) sfxToggle.addEventListener('change', (e) => updateSettings('sfxToggle', e.target.checked));
+  if (quickSfxToggle) quickSfxToggle.addEventListener('change', (e) => updateSettings('sfxToggle', e.target.checked));
+  
+  if (musicVolumeInput) musicVolumeInput.addEventListener('input', (e) => updateSettings('musicVolume', e.target.value));
+  if (quickMusicVolumeInput) quickMusicVolumeInput.addEventListener('input', (e) => updateSettings('musicVolume', e.target.value));
+  if (sfxVolumeInput) sfxVolumeInput.addEventListener('input', (e) => updateSettings('sfxVolume', e.target.value));
+  if (quickSfxVolumeInput) quickSfxVolumeInput.addEventListener('input', (e) => updateSettings('sfxVolume', e.target.value));
+
+  // Quick Settings Overlay triggers
+  if (quickSettingsBtn) {
+    quickSettingsBtn.addEventListener('click', () => quickSettingsOverlay.classList.remove('hidden'));
+  }
+  if (closeQuickSettingsBtn) {
+    closeQuickSettingsBtn.addEventListener('click', () => quickSettingsOverlay.classList.add('hidden'));
+  }
+  if (winOkBtn) {
+    winOkBtn.addEventListener('click', () => {
+      if (pendingResult === 'win') finalizeWinRound();
+    });
+  }
+  if (loseOkBtn) {
+    loseOkBtn.addEventListener('click', () => {
+      if (pendingResult === 'lose') finalizeLoseRound();
+    });
+  }
+
+  function showHome() {
+    installScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    settingsScreen.classList.add('hidden');
+    homeScreen.classList.remove('hidden');
+    stopGameMusic();
+    startMenuMusic();
+  }
+
   function showGame() {
     installScreen.classList.add('hidden');
+    homeScreen.classList.add('hidden');
+    settingsScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
+
+    gameInputUnlockAt = Date.now() + 450;
+
+    // Enter game screen in a stable setup state.
+    hideWinPopup();
+    hideLosePopup();
+    pendingResult = null;
+    phase = 'setup';
+    selectedCell = null;
+    possibleMoves = [];
+    setupPanel.classList.remove('hidden');
+    setupPanel.classList.remove('fade-out');
+    bigMovesDisplay.classList.add('hidden');
+    renderBoard(board);
+
+    stopMenuMusic();
+    startGameMusic();
   }
 
   function showInstall() {
     installScreen.classList.remove('hidden');
     gameScreen.classList.add('hidden');
+    homeScreen.classList.add('hidden');
+    settingsScreen.classList.add('hidden');
+    stopMenuMusic();
+    stopGameMusic();
   }
+  
+  function showSettings() {
+    installScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    homeScreen.classList.add('hidden');
+    settingsScreen.classList.remove('hidden');
+    stopGameMusic();
+    startMenuMusic(); // Will just ensure volume/play state if already active
+  }
+
+  if (playGameBtn) playGameBtn.addEventListener('click', showGame);
+  if (settingsBtn) settingsBtn.addEventListener('click', showSettings);
+  if (backToHomeBtn) backToHomeBtn.addEventListener('click', showHome);
+
+  loadData(); // Load saved profiles & set settings
 
   try {
     const isStandalone = 
@@ -641,14 +977,14 @@ document.addEventListener('DOMContentLoaded', () => {
       window.navigator.standalone === true;
 
     if (isStandalone) {
-      showGame();
+      showHome();
     } else {
       showInstall();
     }
   } catch (e) {
     // fallback just in case
     if (TEST_FORCE_STANDALONE === true) {
-      showGame();
+      showHome();
     } else {
       showInstall();
     }

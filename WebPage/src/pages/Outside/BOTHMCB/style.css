@@ -193,3 +193,63 @@ body{
 @media (min-width:420px){
   .install-inner h1{font-size:1.6rem}
 }
+
+/* Profile Box */
+.profile-box {
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:8px;
+}
+.profile-box h3 {
+  margin:0 0 12px 0;
+  color:var(--accent);
+  font-size:1.1rem;
+}
+.profile-stat {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:0.95rem;
+}
+
+/* Settings */
+.settings-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.settings-row label {
+  font-size:1rem;
+}
+
+
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-inner {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 350px;
+  animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
