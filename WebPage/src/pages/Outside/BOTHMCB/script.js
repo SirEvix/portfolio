@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <defs>
     <style>
       .cls-1 {
-        fill: #1f2325;
+        fill: #ffffff;
       }
     </style>
   </defs>
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <defs>
     <style>
       .cls-1 {
-        fill: #1f2325;
+        fill: #ffffff;
       }
     </style>
   </defs>
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <defs>
     <style>
       .cls-1 {
-        fill: #1f2325;
+        fill: #ffffff;
       }
     </style>
   </defs>
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <defs>
     <style>
       .cls-1 {
-        fill: #1f2325;
+        fill: #ffffff;
       }
     </style>
   </defs>
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <defs>
     <style>
       .cls-1 {
-        fill: #1f2325;
+        fill: #ffffff;
       }
     </style>
   </defs>
@@ -468,8 +468,13 @@ document.addEventListener('DOMContentLoaded', () => {
     possibleMoves = [];
     
     // Update UI
-    setupPanel.classList.add('hidden');
+  setupPanel.classList.add('fade-out');
+
+  setTimeout(() => {
+    setupPanel.classList.add('hidden');   // removes from layout
     bigMovesDisplay.classList.remove('hidden');
+  }, 500); // match CSS transition
+
     bigMovesDisplay.textContent = remainingMoves;
     renderBoard(board);
   }
@@ -554,15 +559,29 @@ document.addEventListener('DOMContentLoaded', () => {
       alert(`YOU WIN!\n\nRank: ${lastRank} (${Math.round(acc*100)}%)\nCard Score: ${Math.floor(100 * acc)}`);
       
       if (winCounterDisplay) {
-        winCounterDisplay.innerHTML = `Last Card: ${lastRank} (${Math.round(acc*100)}%)<br>Cards Matched: ${winCount}<br>Overall: ${overallRank} (${Math.round(overallAcc*100)}%)`;
+        winCounterDisplay.innerHTML = `
+  <span>Last: ${lastRank} (${Math.round(acc*100)}%)</span>
+  <span>Cards: ${winCount}</span>
+  <span>Overall: ${overallRank} (${Math.round(overallAcc*100)}%)</span>
+`;
+
       }
       
       // Setup phase for new card, play area remains as is
-      phase = 'setup';
-      setupPanel.classList.remove('hidden');
-      bigMovesDisplay.classList.add('hidden');
-      generateRandomGoal();
-      return true;
+  phase = 'setup';
+
+  // show panel again (but still transparent)
+  setupPanel.classList.remove('hidden');
+
+  // allow browser to apply display:block before removing fade-out
+  setTimeout(() => {
+    setupPanel.classList.remove('fade-out');
+  }, 10);
+
+  bigMovesDisplay.classList.add('hidden');
+  generateRandomGoal();
+  return true;
+
     }
     if (remainingMoves<=0){
       alert('YOU LOSE!');
