@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // For production builds you can uncomment and set to null or remove this line.
   // Example (uncomment to force game view while testing):
   // const TEST_FORCE_STANDALONE = true;
-   const TEST_FORCE_STANDALONE = null;
-   const APP_VERSION = "0.002";
+   const TEST_FORCE_STANDALONE = true;
+   const APP_VERSION = "0.005";
 
   // Data & Settings state
   let longestStreak = 0;
@@ -180,9 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 10);
       bigMovesDisplay.classList.add('hidden');
       generateRandomGoal();
+      randomizeBoard();
       pendingResult = null;
       hideWinPopup();
-      showHome();
+      // showHome();
     }
 
     function finalizeLoseRound() {
