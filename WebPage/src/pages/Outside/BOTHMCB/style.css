@@ -5,6 +5,18 @@
   --accent:#d32f2f;
   --muted:#9a9a9a;
   --text:#fafafa;
+
+  /* Board + cells */
+  --board-border:#222;
+  --board-bg:linear-gradient(135deg,#151515,#0e0e10);
+  --cell-border:rgba(255,255,255,0.06);
+  --goal-cell-border:rgba(255,255,255,0.04);
+  --selected-outline:rgba(0,122,255,0.75);
+  --selected-bg:rgba(0,122,255,0.08);
+  --allowed-bg:rgba(52,199,89,0.12);
+  --allowed-border:2px dashed rgba(52,199,89,0.25);
+  --blocked-bg:rgba(255,59,48,0.06);
+  --blocked-border:2px dashed rgba(255,59,48,0.18);
 }
 html,body,#app{
   height:100%;
@@ -69,9 +81,15 @@ body{
   box-shadow:0 8px 30px rgba(0,0,0,0.6);
 }
 .overlay h2{margin-top:0}
-.btn{background:none;border:1px solid var(--muted);padding:8px 12px;border-radius:8px;color:var(--text)}
+.btn{
+  background:none;
+  border:1px solid var(--muted);
+  padding:8px 12px;
+  border-radius:8px;
+  color:var(--text);
+}
 
-
+/* Setup panel */
 .setup-panel {
   width:100%;
   max-width:600px;
@@ -85,21 +103,29 @@ body{
   transition: opacity 0.5s ease;
   opacity: 1;
 }
-/* fade-out animation */
 .fade-out {
   opacity: 0;
   pointer-events: none;
 }
-
-/* fully removed from layout */
 .hidden {
   display: none;
 }
 
-
 /* Game screen */
-.game-header{position:fixed;top:0;left:0;right:0;padding:12px 16px;background:linear-gradient(180deg, rgba(0,0,0,0.6), transparent);backdrop-filter:blur(4px)}
-.game-header h2{margin:0;font-size:1rem;text-align:center}
+.game-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  padding:12px 16px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+  backdrop-filter:blur(4px);
+}
+.game-header h2{
+  margin:0;
+  font-size:1rem;
+  text-align:center;
+}
 .game-body{
   display:flex;
   flex-direction:column;
@@ -112,15 +138,16 @@ body{
   padding:50px 8px 12px 8px; /* leave space for header */
 }
 
+/* Board wrapper */
 .board-placeholder{
   width:100%;
   max-width:500px;
-  max-height: 55vh; /* Enforces height boundary so it never has to squash */
-  flex: 0 1 auto; /* Stop flex-grow from illegally forcing height without respecting aspect-ratio */
+  max-height:55vh;
+  flex:0 1 auto;
   aspect-ratio:1/1;
-  margin: auto;
-  border:3px solid #222;
-  background:linear-gradient(135deg,#151515,#0e0e10);
+  margin:auto;
+  border:3px solid var(--board-border);
+  background:var(--board-bg);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -137,6 +164,72 @@ body{
   flex-direction:column;
 }
 
+/* Grid wrappers */
+#board {
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  grid-template-rows:repeat(3, 1fr);
+  width:100%;
+  aspect-ratio:1 / 1;
+  gap:0;
+}
+#goalGrid {
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  grid-template-rows:repeat(3, 1fr);
+  width:100%;
+  max-width:20vh;
+  max-height:20vh;
+  aspect-ratio:1 / 1;
+  margin:0 auto 8px auto;
+  gap:4px;
+}
+
+/* Goal cells */
+.bm-goal-cell {
+  border:1px solid var(--goal-cell-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px;
+  overflow:hidden;
+  font-size:0.95rem;
+  color:var(--muted);
+}
+
+/* Board cells */
+.bm-cell {
+  border:1px solid var(--cell-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  cursor:pointer;
+  user-select:none;
+  font-size:1.1rem;
+  color:var(--text);
+  padding:2px;
+}
+
+/* Selected cell */
+.bm-cell.selected {
+  outline:3px solid var(--selected-outline);
+  background:var(--selected-bg);
+}
+
+/* Allowed move */
+.bm-cell.move-allowed {
+  background:var(--allowed-bg);
+  border:var(--allowed-border);
+}
+
+/* Blocked move */
+.bm-cell.move-blocked {
+  background:var(--blocked-bg);
+  border:var(--blocked-border);
+}
+
+/* Controls ---------------------------------------------------*/
 .controls{
   display:flex;
   flex-wrap:wrap;
@@ -156,39 +249,36 @@ body{
 }
 
 .piece-svg {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  margin: auto;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
+  margin:auto;
 }
 
+/* Win counter */
 #winCounterDisplay {
-  display: flex;
-  justify-content: space-between; /* left - center - right */
-  align-items: center;
-  width: 100%;
-  padding: 0 8px;
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-bottom: 4px;
-  line-height: 1.4;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:100%;
+  padding:0 8px;
+  font-size:0.85rem;
+  color:var(--muted);
+  margin-bottom:4px;
+  line-height:1.4;
 }
-
 #winCounterDisplay span {
-  white-space: nowrap;
-  flex: 1;               /* each takes equal width */
-  text-align: center;    /* center text inside each slot */
+  white-space:nowrap;
+  flex:1;
+  text-align:center;
 }
-
 #winCounterDisplay span:first-child {
-  text-align: left;
+  text-align:left;
 }
-
 #winCounterDisplay span:last-child {
-  text-align: right;
+  text-align:right;
 }
-
 
 @media (min-width:420px){
   .install-inner h1{font-size:1.6rem}
@@ -224,32 +314,30 @@ body{
   font-size:1rem;
 }
 
-
+/* Popups */
 .popup {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
 }
-
 .popup.hidden {
-  display: none;
+  display:none;
 }
-
 .popup-inner {
-  background: var(--card);
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  width: 90%;
-  max-width: 350px;
-  animation: popIn 0.25s ease;
+  background:var(--card);
+  padding:20px;
+  border-radius:12px;
+  text-align:center;
+  width:90%;
+  max-width:350px;
+  animation:popIn 0.25s ease;
 }
 
 @keyframes popIn {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from { transform:scale(0.8); opacity:0; }
+  to { transform:scale(1); opacity:1; }
 }

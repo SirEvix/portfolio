@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // For production builds you can uncomment and set to null or remove this line.
   // Example (uncomment to force game view while testing):
   // const TEST_FORCE_STANDALONE = true;
-   const TEST_FORCE_STANDALONE = true;
+   const TEST_FORCE_STANDALONE = true; // Set to true to force standalone/gameScreen, false to force installScreen, or null to use real detection
    const APP_VERSION = "0.005";
 
   // Data & Settings state
@@ -472,92 +472,82 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Rendering
+  // function renderGoal(g){
+  //   // render as a 3x3 grid above the board; fallback to console if container missing
+  //   if (!goalGrid) { console.log('Goal:', g); return; }
+  //   goalGrid.innerHTML = '';
+  //   for (let r=0;r<3;r++){
+  //     const rowEl = document.createElement('div');
+  //     rowEl.style.display='flex';
+  //     rowEl.style.width='100%';
+  //     rowEl.style.flex='1';
+  //     rowEl.style.minHeight='0';
+  //     for (let c=0;c<3;c++){
+  //       const cell = document.createElement('div');
+  //       cell.className = 'bm-goal-cell';
+  //       cell.innerHTML = getPieceSVG(g[r][c]);
+  //       // cell.style.flex='1';
+  //       cell.style.minWidth='0';
+  //       cell.style.minHeight='0';
+  //       cell.style.border='1px solid rgba(255,255,255,0.04)';
+  //       cell.style.padding='4px';
+  //       cell.style.display='flex';
+  //       cell.style.alignItems='center';
+  //       cell.style.justifyContent='center';
+  //       cell.style.overflow='hidden';
+  //       cell.style.fontSize='0.95rem';
+  //       cell.style.color='var(--muted)';
+  //       rowEl.appendChild(cell);
+  //     }
+  //     goalGrid.appendChild(rowEl);
+  //   }
+  //   console.log('Goal:', g);
+  // }
   function renderGoal(g){
-    // render as a 3x3 grid above the board; fallback to console if container missing
-    if (!goalGrid) { console.log('Goal:', g); return; }
-    goalGrid.innerHTML = '';
-    for (let r=0;r<3;r++){
-      const rowEl = document.createElement('div');
-      rowEl.style.display='flex';
-      rowEl.style.width='100%';
-      rowEl.style.flex='1';
-      rowEl.style.minHeight='0';
-      for (let c=0;c<3;c++){
-        const cell = document.createElement('div');
-        cell.className = 'bm-goal-cell';
-        cell.innerHTML = getPieceSVG(g[r][c]);
-        cell.style.flex='1';
-        cell.style.minWidth='0';
-        cell.style.minHeight='0';
-        cell.style.border='1px solid rgba(255,255,255,0.04)';
-        cell.style.padding='4px';
-        cell.style.display='flex';
-        cell.style.alignItems='center';
-        cell.style.justifyContent='center';
-        cell.style.overflow='hidden';
-        cell.style.fontSize='0.95rem';
-        cell.style.color='var(--muted)';
-        rowEl.appendChild(cell);
-      }
-      goalGrid.appendChild(rowEl);
+  if (!goalGrid) return;
+  goalGrid.innerHTML = '';
+
+  for (let r=0; r<3; r++){
+    for (let c=0; c<3; c++){
+      const cell = document.createElement('div');
+      cell.className = 'bm-goal-cell';
+      cell.innerHTML = getPieceSVG(g[r][c]);
+      goalGrid.appendChild(cell);
     }
-    console.log('Goal:', g);
   }
+}
+
 
   function renderBoard(b){
-    if (!boardContainer) return;
-    // clear
-    boardContainer.innerHTML = '';
-    // create a 3x3 grid
-    for (let r=0;r<3;r++){
-      const rowEl = document.createElement('div');
-      rowEl.style.display='flex';
-      rowEl.style.width='100%';
-      rowEl.style.flex='1';
-      rowEl.style.minHeight='0';
-      for (let c=0;c<3;c++){
-        const cell = document.createElement('div');
-        cell.className = 'bm-cell';
-        cell.dataset.r = r;
-        cell.dataset.c = c;
-        cell.innerHTML = getPieceSVG(b[r][c]);
-        cell.style.flex='1';
-        cell.style.minWidth='0';
-        cell.style.minHeight='0';
-        cell.style.border='1px solid rgba(255,255,255,0.06)';
-        cell.style.padding='2px';
-        cell.style.display='flex';
-        cell.style.alignItems='center';
-        cell.style.justifyContent='center';
-        cell.style.overflow='hidden';
-        cell.style.cursor='pointer';
-        cell.style.userSelect='none';
-        cell.style.fontSize='1.1rem';
-        cell.style.color='var(--text)';
-        // highlight selected (blue)
-        if (selectedCell && selectedCell.r==r && selectedCell.c==c){
-          cell.style.outline='3px solid rgba(0,122,255,0.75)';
-          cell.style.background = 'rgba(0,122,255,0.08)';
-        }
-        // highlight possible moves: green if empty, red if occupied (blocked)
-        const isPossible = possibleMoves.some(pm=>pm[0]===r && pm[1]===c);
-        if (isPossible){
-          if (board[r][c]===0){
-            // allowed
-            cell.style.background = 'rgba(52,199,89,0.12)';
-            cell.style.border = '2px dashed rgba(52,199,89,0.25)';
-          } else {
-            // blocked because occupied
-            cell.style.background = 'rgba(255,59,48,0.06)';
-            cell.style.border = '2px dashed rgba(255,59,48,0.18)';
-          }
-        }
-        // click handler
-        cell.addEventListener('click', () => onCellClick(r,c));
-        rowEl.appendChild(cell);
+     if (!boardContainer) return;
+  boardContainer.innerHTML = '';
+  for (let r=0; r<3; r++){
+    for (let c=0; c<3; c++){
+      const cell = document.createElement('div');
+      cell.className = 'bm-cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      cell.innerHTML = getPieceSVG(b[r][c]);
+
+      // highlight selected
+      if (selectedCell && selectedCell.r == r && selectedCell.c == c) {
+        cell.classList.add('selected');
       }
-      boardContainer.appendChild(rowEl);
+
+      // highlight possible moves
+      const isPossible = possibleMoves.some(pm => pm[0]===r && pm[1]===c);
+      if (isPossible) {
+        if (board[r][c] === 0) {
+          cell.classList.add('move-allowed');
+        } else {
+          cell.classList.add('move-blocked');
+        }
+      }
+
+      cell.addEventListener('click', () => onCellClick(r,c));
+      boardContainer.appendChild(cell);
     }
+  }
   }
 
   // Goal generation
