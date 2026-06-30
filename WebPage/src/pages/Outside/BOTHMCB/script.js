@@ -909,6 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gameScreen.classList.add('hidden');
     settingsScreen.classList.add('hidden');
     homeScreen.classList.remove('hidden');
+    document.body.classList.remove('game-mode'); // remove game-mode class when returning to home (this hides game background and shows home background)
     stopGameMusic();
     startMenuMusic();
   }
@@ -924,6 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Enter game screen in a stable setup state.
     hideWinPopup();
     hideLosePopup();
+    document.body.classList.add('game-mode'); // add game-mode class to body (this hides home background and shows game background)
     pendingResult = null;
     phase = 'setup';
     selectedCell = null;

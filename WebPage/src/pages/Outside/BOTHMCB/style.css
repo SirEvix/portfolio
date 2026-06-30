@@ -7,8 +7,9 @@
   --text:#fafafa;
 
   /* Board + cells */
-  --board-border:#222;
-  --board-bg:linear-gradient(135deg,#151515,#0e0e10);
+  --board-border:#2222222c;
+  --board-bg:linear-gradient(135deg,#15151559,#0e0e1059);
+  --board-shadow:0 8px 30px rgba(22, 0, 0, 0.6);
   --cell-border:rgba(255,255,255,0.06);
   --goal-cell-border:rgba(255,255,255,0.04);
   --selected-outline:rgba(0,122,255,0.75);
@@ -17,6 +18,10 @@
   --allowed-border:2px dashed rgba(52,199,89,0.25);
   --blocked-bg:rgba(255,59,48,0.06);
   --blocked-border:2px dashed rgba(255,59,48,0.18);
+
+    /* Background images */
+  --bg-main:url('icons/BOTHMCB_BG.JPG');
+  --bg-game:url('icons/BOTHMCB_BG_GAME.png');
 }
 html,body,#app{
   height:100%;
@@ -26,9 +31,20 @@ html,body,#app{
 body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  background:linear-gradient(180deg,#070707, #0f0f12);
+  background: var(--bg-main);
+  background-size: cover;
+  background-position: center;
   color:var(--text);
   -webkit-font-smoothing:antialiased;
+}
+
+body.game-mode {
+  background: var(--bg-game);
+  background-size: cover;
+  background-position: center;
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.548); /* Optional: darken the background for better contrast */
+  background-blend-mode: overlay; /* Optional: blend the background image with the color */
 }
 .screen{
   height:100vh;
@@ -41,6 +57,22 @@ body{
   overflow:hidden;
 }
 .hidden{display:none}
+
+
+
+#homeScreen {
+  position: relative;
+}
+
+#playGameBtn {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+
 
 /* Install screen */
 .install-inner{
@@ -148,6 +180,7 @@ body{
   margin:auto;
   border:3px solid var(--board-border);
   background:var(--board-bg);
+  box-shadow:var(--board-shadow);
   display:flex;
   flex-direction:column;
   align-items:center;
