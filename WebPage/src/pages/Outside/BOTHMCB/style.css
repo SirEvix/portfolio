@@ -20,7 +20,7 @@
   --blocked-border:2px dashed rgba(255,59,48,0.18);
 
     /* Background images */
-  --bg-main:url('icons/BOTHMCB_BG.JPG');
+  --bg-main:url('icons/BOTHMCB_BG.png');
   --bg-game:url('icons/BOTHMCB_BG_GAME.png');
 }
 html,body,#app{
@@ -36,6 +36,52 @@ body{
   background-position: center;
   color:var(--text);
   -webkit-font-smoothing:antialiased;
+}
+.home-inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.menu-title-img {
+  width:min(92vw, 360px);
+  height:auto;
+  display:block;
+  margin:0 auto 4px auto;
+}
+
+.menu-buttons {
+  display:flex;
+  flex-direction:column;
+  /* gap:10px; */
+  align-items:center;
+}
+
+.menu-image-btn {
+  border:0;
+  background:transparent;
+  padding:0;
+  cursor:pointer;
+  width:min(80vw, 300px);
+}
+
+.menu-image-btn img {
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+.version-info {
+  position: absolute;
+  bottom: 10px;
+  right: 45%;
+  margin-top:20px;
+  font-size:0.8rem;
+  color:var(--muted);
 }
 
 body.game-mode {
@@ -57,22 +103,6 @@ body.game-mode {
   overflow:hidden;
 }
 .hidden{display:none}
-
-
-
-#homeScreen {
-  position: relative;
-}
-
-#playGameBtn {
-  position: absolute;
-  bottom: 12%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-
-
 
 /* Install screen */
 .install-inner{
@@ -297,7 +327,7 @@ body.game-mode {
   width:100%;
   padding:0 8px;
   font-size:0.85rem;
-  color:var(--muted);
+  color:inherit;
   margin-bottom:4px;
   line-height:1.4;
 }
@@ -306,12 +336,22 @@ body.game-mode {
   flex:1;
   text-align:center;
 }
+ #winCounterDisplay span {
+  flex: 0 0 auto;
+}
+
 #winCounterDisplay span:first-child {
   text-align:left;
 }
 #winCounterDisplay span:last-child {
   text-align:right;
 }
+#winCounterDisplay svg {
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+
 
 @media (min-width:420px){
   .install-inner h1{font-size:1.6rem}
@@ -319,7 +359,7 @@ body.game-mode {
 
 /* Profile Box */
 .profile-box {
-  background:rgba(255,255,255,0.05);
+  background:rgba(19, 1, 1, 0.664);
   border:1px solid rgba(255,255,255,0.1);
   border-radius:12px;
   padding:16px;
@@ -369,6 +409,39 @@ body.game-mode {
   max-width:350px;
   animation:popIn 0.25s ease;
 }
+#winRank {
+  margin: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#winRank svg {
+  width: 160px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+#winCounterDisplay {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  align-items: center;
+}
+
+#winCounterDisplay .wc-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#winCounterDisplay .wc-rank svg {
+  width: 40px;
+  height: auto;
+  display: block;
+}
+
 
 @keyframes popIn {
   from { transform:scale(0.8); opacity:0; }

@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const playGameBtn = document.getElementById('playGameBtn');
   const settingsBtn = document.getElementById('settingsBtn');
   const backToHomeBtn = document.getElementById('backToHomeBtn');
-  const updateBtn = document.getElementById('updateBtn');
   const versionLabel = document.getElementById('versionLabel');
   const deleteDataBtn = document.getElementById('deleteDataBtn');
   
@@ -18,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const quickSettingsBtn = document.getElementById('quickSettingsBtn');
   const quickSettingsOverlay = document.getElementById('quickSettingsOverlay');
   const closeQuickSettingsBtn = document.getElementById('closeQuickSettingsBtn');
+  const saveExitBtn = document.getElementById('saveExitBtn');
   const quickMusicToggle = document.getElementById('quickMusicToggle');
   const quickSfxToggle = document.getElementById('quickSfxToggle');
   const quickMusicVolumeInput = document.getElementById('quickMusicVolume');
@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // const TEST_FORCE_STANDALONE = true;
    const TEST_FORCE_STANDALONE = true; // Set to true to force standalone/gameScreen, false to force installScreen, or null to use real detection
    const APP_VERSION = "0.005";
+  const SAVE_KEY = 'BOTHMCB_SAVE';
 
   // Data & Settings state
   let longestStreak = 0;
@@ -154,11 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sfxEnabled) { sfxNewGoal.volume = sfxVolume; sfxNewGoal.currentTime = 0; sfxNewGoal.play().catch(e=>{}); }
   }
 
-    function showWinPopup(rank, accuracyPercent, cardScore) {
-      if (winRankText) winRankText.textContent = `Rank: ${rank} (${accuracyPercent}%)`;
-      if (winScoreText) winScoreText.textContent = `Card Score: ${cardScore}`;
-      winPopup?.classList.remove('hidden');
-    }
+function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatPenaltyPercent = 0, rawAccuracyPercent = accuracyPercent) {
+  if (winRankText) winRankText.innerHTML = getRankSVG(rank);
+  if (winScoreText) {
+    winScoreText.innerHTML = `Card Score: ${cardScore} (${accuracyPercent}%)<br>Base Accuracy: ${rawAccuracyPercent}%<br>Repeated States: ${repeatCount}<br>Repeat Penalty: -${repeatPenaltyPercent}%`;
+  }
+  winPopup?.classList.remove('hidden');
+}
+
 
     function hideWinPopup() {
       winPopup?.classList.add('hidden');
@@ -183,13 +187,15 @@ document.addEventListener('DOMContentLoaded', () => {
       randomizeBoard();
       pendingResult = null;
       hideWinPopup();
+      updateRunStatsDisplay();
       // showHome();
     }
 
     function finalizeLoseRound() {
       winCount = 0;
       totalAccuracy = 0;
-      if (winCounterDisplay) winCounterDisplay.textContent = `Cards Matched: 0`;
+      lastRoundAccuracy = null;
+      updateRunStatsDisplay();
 
       phase = 'setup';
       setupPanel.classList.remove('hidden');
@@ -201,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       randomizeBoard();
       pendingResult = null;
       hideLosePopup();
+      clearInProgressGame();
       showHome();
     }
 
@@ -228,10 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function loadData() {
-      const data = JSON.parse(localStorage.getItem('BOTHMCB_SAVE')) || {};
+      const data = JSON.parse(localStorage.getItem(SAVE_KEY)) || {};
       longestStreak = data.longestStreak || 0;
       totalCards = data.totalCards || 0;
       totalAccuracySum = data.totalAccuracySum || 0;
+      currentStreak = data.currentStreak || 0;
+      inProgressGame = data.inProgressGame || null;
       
       musicEnabled = data.musicEnabled !== undefined ? data.musicEnabled : true;
       sfxEnabled = data.sfxEnabled !== undefined ? data.sfxEnabled : true;
@@ -244,14 +253,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function saveData() {
-      localStorage.setItem('BOTHMCB_SAVE', JSON.stringify({
-          longestStreak, totalCards, totalAccuracySum, musicEnabled, sfxEnabled, musicVolume, sfxVolume
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        longestStreak,
+        totalCards,
+        totalAccuracySum,
+        currentStreak,
+        musicEnabled,
+        sfxEnabled,
+        musicVolume,
+        sfxVolume,
+        inProgressGame
       }));
   }
 
   function resetData() {
-      localStorage.removeItem('BOTHMCB_SAVE');
+      localStorage.removeItem(SAVE_KEY);
       currentStreak = 0;
+      inProgressGame = null;
+      winCount = 0;
+      totalAccuracy = 0;
+      lastRoundAccuracy = null;
       loadData();
       alert("All data deleted!");
   }
@@ -265,19 +286,121 @@ document.addEventListener('DOMContentLoaded', () => {
       if (versionLabel) versionLabel.textContent = APP_VERSION;
   }
 
-  async function checkForUpdate() {
-      try {
-          const res = await fetch('https://florin-lica.com/Outside/BOTHMCB/version.json');
-          const data = await res.json();
-          if (parseFloat(data.version) > parseFloat(APP_VERSION)) {
-              alert('New version available!');
-          } else {
-              alert('You are up to date');
-          }
-      } catch(e) {
-          alert('Could not check for updates');
+      function getRunOverallAccuracy() {
+        return winCount > 0 ? totalAccuracy / winCount : 0;
       }
-  }
+
+      function updateRunStatsDisplay() {
+        if (!winCounterDisplay) return;
+        if (winCount <= 0 || lastRoundAccuracy === null) {
+          winCounterDisplay.textContent = 'Cards Matched: 0';
+          return;
+        }
+
+        const overallAcc = getRunOverallAccuracy();
+        const lastRankSVG = getRankSVG(getRank(lastRoundAccuracy));
+        const overallRankSVG = getRankSVG(getRank(overallAcc));
+
+        winCounterDisplay.innerHTML = `
+      <span class="wc-item">
+        <span class="wc-label">Last:</span>
+        <span class="wc-rank">${lastRankSVG}</span>
+        <span class="wc-percent">${Math.round(lastRoundAccuracy * 100)}%</span>
+      </span>
+      <span class="wc-item">
+        <span class="wc-label">Cards:</span>
+        <span class="wc-value">${winCount}</span>
+      </span>
+      <span class="wc-item">
+        <span class="wc-label">Overall:</span>
+        <span class="wc-rank">${overallRankSVG}</span>
+        <span class="wc-percent">${Math.round(overallAcc * 100)}%</span>
+      </span>
+      `;
+      }
+
+      function captureInProgressGame() {
+        return {
+          phase,
+          board: cloneMatrix(board),
+          baseGoal: cloneMatrix(baseGoal),
+          goalPieces: goalPieces.slice(),
+          rotateState,
+          mirrorHState,
+          mirrorVState,
+          declaredMoves,
+          remainingMoves,
+          bidValue: bidInput ? bidInput.value : '10',
+          winCount,
+          totalAccuracy,
+          lastRoundAccuracy
+        };
+      }
+
+      function clearInProgressGame() {
+        inProgressGame = null;
+        saveData();
+      }
+
+      function restoreInProgressGame(savedGame) {
+        if (!savedGame) return false;
+
+        phase = savedGame.phase || 'setup';
+        board = cloneMatrix(savedGame.board || board);
+        baseGoal = cloneMatrix(savedGame.baseGoal || baseGoal);
+        goalPieces = Array.isArray(savedGame.goalPieces) ? savedGame.goalPieces.slice() : goalPieces;
+        rotateState = savedGame.rotateState || 0;
+        mirrorHState = savedGame.mirrorHState || 0;
+        mirrorVState = savedGame.mirrorVState || 0;
+        declaredMoves = savedGame.declaredMoves || 0;
+        remainingMoves = savedGame.remainingMoves || 0;
+        winCount = savedGame.winCount || 0;
+        totalAccuracy = savedGame.totalAccuracy || 0;
+        lastRoundAccuracy = savedGame.lastRoundAccuracy ?? null;
+        selectedCell = null;
+        possibleMoves = [];
+        pendingResult = null;
+
+        if (bidInput && savedGame.bidValue !== undefined) {
+          bidInput.value = savedGame.bidValue;
+        }
+
+        applyTransforms();
+        resetRepeatStateTracking(board);
+        renderBoard(board);
+        updateRunStatsDisplay();
+
+        if (phase === 'play') {
+          setupPanel.classList.add('hidden');
+          setupPanel.classList.add('fade-out');
+          bigMovesDisplay.classList.remove('hidden');
+          bigMovesDisplay.textContent = Math.max(0, remainingMoves);
+        } else {
+          phase = 'setup';
+          setupPanel.classList.remove('hidden');
+          setupPanel.classList.remove('fade-out');
+          bigMovesDisplay.classList.add('hidden');
+        }
+
+        return true;
+      }
+
+      function startFreshGameSession() {
+        phase = 'setup';
+        winCount = 0;
+        totalAccuracy = 0;
+        lastRoundAccuracy = null;
+        selectedCell = null;
+        possibleMoves = [];
+        pendingResult = null;
+        if (bidInput) bidInput.value = 10;
+        setupPanel.classList.remove('hidden');
+        setupPanel.classList.remove('fade-out');
+        bigMovesDisplay.classList.add('hidden');
+        generateRandomGoal();
+        randomizeBoard();
+        updateRunStatsDisplay();
+      }
 
   // Game state
   let phase = 'setup'; // 'setup' | 'play'
@@ -311,8 +434,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedCell = null; // {r,c}
   let possibleMoves = [];
   let gameInputUnlockAt = 0;
+  let visitedStates = new Map();
+  let repeatStateCount = 0;
 
   let totalAccuracy = 0;
+  let lastRoundAccuracy = null;
+  let inProgressGame = null;
   let pendingResult = null; // 'win' | 'lose' | null
 
   // Goal pieces (5-piece card)
@@ -426,6 +553,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // Utility
   function cloneMatrix(m){
     return m.map(row=>row.slice());
+  }
+
+  function getBoardStateKey(state = board) {
+    return state.map(row => row.join(',')).join('|');
+  }
+
+  function resetRepeatStateTracking(state = board) {
+    visitedStates = new Map();
+    repeatStateCount = 0;
+    const initialStateKey = getBoardStateKey(state);
+    visitedStates.set(initialStateKey, 1);
+  }
+
+  function recordCurrentBoardState() {
+    const stateKey = getBoardStateKey(board);
+    const visits = visitedStates.get(stateKey) || 0;
+    visitedStates.set(stateKey, visits + 1);
+
+    if (visits > 0) {
+      repeatStateCount++;
+    }
+  }
+
+  function getRepeatStatePenaltyPoints() {
+    let penaltyPoints = 0;
+
+    visitedStates.forEach((visits) => {
+      const revisits = Math.max(0, visits - 1);
+      const penalizedRevisits = Math.max(0, revisits - 1);
+
+      penaltyPoints += (penalizedRevisits * (penalizedRevisits + 1)) / 2;
+    });
+
+    return penaltyPoints;
   }
 
   function getPenalty() {
@@ -631,6 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const r = Math.floor(pos/3), c = pos%3;
       board[r][c] = goalPieces[i];
     }
+    resetRepeatStateTracking(board);
     renderBoard(board);
   }
 
@@ -713,6 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
     phase = 'play';
     selectedCell = null;
     possibleMoves = [];
+    resetRepeatStateTracking(board);
     
     // Update UI
   setupPanel.classList.add('fade-out');
@@ -759,6 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
       board[r][c] = tmp;
       selectedCell = null;
       possibleMoves = [];
+      recordCurrentBoardState();
       consumeMove();
       renderBoard(board);
       return;
@@ -789,16 +953,108 @@ document.addEventListener('DOMContentLoaded', () => {
     return "F";
   }
 
+  let rankSvgIdCounter = 0;
+
+  function getRankSVG(rank) {
+  const uniqueId = `rank-grad-${rank.toLowerCase().replace(/[^a-z0-9-]/g, '')}-${rankSvgIdCounter++}`;
+  const svgs = {
+    "SS": `<svg width="140" height="120" viewBox="0 0 140 120">
+  <defs>
+    <linearGradient id="${uniqueId}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="40%" stop-color="#ffef9f"/>
+      <stop offset="70%" stop-color="#ff3b3b"/>
+      <stop offset="100%" stop-color="#b30000"/>
+    </linearGradient>
+  </defs>
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="60" font-family="Impact, sans-serif"
+        fill="url(#${uniqueId})" stroke="#000" stroke-width="3">SS</text>
+</svg>`,
+    "S": `<svg width="120" height="120" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="${uniqueId}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="40%" stop-color="#ffef9f"/>
+      <stop offset="70%" stop-color="#ff3b3b"/>
+      <stop offset="100%" stop-color="#b30000"/>
+    </linearGradient>
+  </defs>
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="60" font-family="Impact, sans-serif"
+        fill="url(#${uniqueId})" stroke="#000" stroke-width="3">S</text>
+</svg>`
+,
+    "A": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="60" font-family="Impact, sans-serif"
+        fill="#f1c40f" stroke="#000" stroke-width="3">A</text>
+</svg>
+`,
+    "B": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="70" font-family="Impact, sans-serif"
+        fill="#2471A3" stroke="#000" stroke-width="3">B</text>
+</svg>
+`,
+    "C": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="70" font-family="Impact, sans-serif"
+        fill="#27AE60" stroke="#000" stroke-width="3">C</text>
+</svg>
+`,
+"D": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="70" font-family="Impact, sans-serif"
+        fill="#7D3C98" stroke="#000" stroke-width="3">D</text>
+</svg>
+`,
+
+    "E": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="70" font-family="Impact, sans-serif"
+        fill="#D35400" stroke="#000" stroke-width="3">E</text>
+</svg>
+`,
+    "F": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="70" font-family="Impact, sans-serif"
+        fill="#7B241C" stroke="#000" stroke-width="3">F</text>
+</svg>`,
+    "F-": `<svg width="90" height="100" viewBox="0 0 120 120">
+  <text x="50%" y="50%" text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="60" font-family="Impact, sans-serif"
+        fill="#dc2367" stroke="#000" stroke-width="3">F-</text>
+</svg>`
+  };
+  return svgs[rank];
+}
+
+
   function checkWinCondition(){
     if (phase !== 'play') return null;
 
     if (arraysEqual(board, goal)){
       const A = declaredMoves - remainingMoves;
       const D = Math.max(1, declaredMoves);
-      const acc = A / D;
+      const rawAcc = A / D;
+      const repeatPenaltyInput = repeatStateCount;
+      const repeatPenaltyPoints = getRepeatStatePenaltyPoints();
+      const repeatPenalty = repeatPenaltyPoints / D;
+      const acc = Math.max(0, rawAcc - repeatPenalty);
 
       totalAccuracy += acc;
       winCount++;
+      lastRoundAccuracy = acc;
       
       currentStreak++;
       totalCards++;
@@ -808,24 +1064,23 @@ document.addEventListener('DOMContentLoaded', () => {
       updateHomeStats();
       playWin();
 
-      const overallAcc = totalAccuracySum / totalCards;
+      const overallAcc = getRunOverallAccuracy();
 
       const lastRank = getRank(acc);
       const overallRank = getRank(overallAcc);
 
         phase = 'result';
         pendingResult = 'win';
-        showWinPopup(lastRank, Math.round(acc*100), Math.floor(100 * acc));
+        showWinPopup(
+          lastRank,
+          Math.round(acc * 100),
+          Math.floor(100 * acc),
+          repeatPenaltyInput,
+          Math.round(repeatPenalty * 100),
+          Math.round(rawAcc * 100)
+        );
 
-      
-      if (winCounterDisplay) {
-        winCounterDisplay.innerHTML = `
-  <span>Last: ${lastRank} (${Math.round(acc*100)}%)</span>
-  <span>Cards: ${winCount}</span>
-  <span>Overall: ${overallRank} (${Math.round(overallAcc*100)}%)</span>
-`;
-
-      }
+      updateRunStatsDisplay();
       return true;
 
     }
@@ -873,7 +1128,6 @@ document.addEventListener('DOMContentLoaded', () => {
   generateRandomGoal();
   randomizeBoard();
 
-  if (updateBtn) updateBtn.addEventListener('click', checkForUpdate);
   if (deleteDataBtn) deleteDataBtn.addEventListener('click', resetData);
   
   if (musicToggle) musicToggle.addEventListener('change', (e) => updateSettings('musicToggle', e.target.checked));
@@ -892,6 +1146,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (closeQuickSettingsBtn) {
     closeQuickSettingsBtn.addEventListener('click', () => quickSettingsOverlay.classList.add('hidden'));
+  }
+  if (saveExitBtn) {
+    saveExitBtn.addEventListener('click', () => {
+      inProgressGame = captureInProgressGame();
+      saveData();
+      quickSettingsOverlay.classList.add('hidden');
+      showHome();
+    });
   }
   if (winOkBtn) {
     winOkBtn.addEventListener('click', () => {
@@ -927,13 +1189,10 @@ document.addEventListener('DOMContentLoaded', () => {
     hideLosePopup();
     document.body.classList.add('game-mode'); // add game-mode class to body (this hides home background and shows game background)
     pendingResult = null;
-    phase = 'setup';
-    selectedCell = null;
-    possibleMoves = [];
-    setupPanel.classList.remove('hidden');
-    setupPanel.classList.remove('fade-out');
-    bigMovesDisplay.classList.add('hidden');
-    renderBoard(board);
+
+    if (!restoreInProgressGame(inProgressGame)) {
+      startFreshGameSession();
+    }
 
     stopMenuMusic();
     startGameMusic();

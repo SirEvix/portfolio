@@ -32,9 +32,8 @@
     </section>
 
     <section id="homeScreen" class="screen hidden">
-      <div class="home-inner" style="text-align:center; display:flex; flex-direction:column; gap:16px; width:100%; max-width:400px; padding:20px;">
-        <h1 style="font-size:1.8rem; margin:0 0 10px 0;">Blood on the Heavy Metal Chess Board</h1>
-
+      <div class="home-inner">
+        <img src="icons/BOTHMCB_Title.png" alt="Blood on the Heavy Metal Chess Board" class="menu-title-img">
         <div class="profile-box">
           <h3>Player Profile</h3>
           <div class="profile-stat"><span>Cards Played:</span> <span id="homeTotalCards">0</span></div>
@@ -42,12 +41,20 @@
           <div class="profile-stat"><span>Best Streak:</span> <span id="homeBestStreak">0</span></div>
         </div>
 
-        <button id="playGameBtn" class="btn-large">PLAY</button>
-        <button id="settingsBtn" class="btn-large" style="background:#333;">SETTINGS</button>
+        <div class="menu-buttons">
+          <button id="playGameBtn" class="menu-image-btn" aria-label="Start">
+            <img src="icons/Start.png" alt="Start">
+          </button>
+          <button id="htpBtn" class="menu-image-btn" aria-label="How To Play">
+            <img src="icons/HTP.png" alt="How To Play">
+          </button>
+          <button id="settingsBtn" class="menu-image-btn" aria-label="Options">
+            <img src="icons/OPT.png" alt="Options">
+          </button>
+        </div>
         
-        <div style="margin-top:20px; font-size:0.8rem; color:var(--muted);">
+        <div class="version-info">
           <div>Ver: <span id="versionLabel">0.001</span></div>
-          <button id="updateBtn" class="btn" style="margin-top:8px;">Check for update</button>
         </div>
       </div>
     </section>
@@ -109,7 +116,10 @@
             <label>SFX Volume</label>
             <input type="range" id="quickSfxVolume" min="0" max="1" step="0.1">
           </div>
-          <button id="closeQuickSettingsBtn" class="btn-large" style="width:100%; margin-top:20px; background:#333;">Close</button>
+          <div style="display:flex; gap:10px; width:100%; margin-top:20px;">
+            <button id="saveExitBtn" class="btn-large" style="flex:1; background:var(--accent);">Save &amp; Exit</button>
+            <button id="closeQuickSettingsBtn" class="btn-large" style="flex:1; background:#333;">Close</button>
+          </div>
         </div>
       </div>
 
@@ -155,8 +165,10 @@
             Modifying the goal adds +1 move penalty per change!<br/>
             <span style="color:var(--text); font-weight:bold;">Penalty Points Added: <span id="penaltyDisplay">0</span></span>
           </div>
-
-          <button id="playBtn" class="btn-large" style="width:100%; max-width:200px; margin-top:2px; padding:10px 16px;">PLAY</button>
+          <!-- <button id="playBtn" class="btn-large" style="width:100%; max-width:200px; margin-top:2px; padding:10px 16px;">PLAY</button> -->
+          <button id="playBtn" class="menu-image-btn" aria-label="Start">
+            <img src="icons/Play.png" alt="Start">
+          </button>
         </div>
 
         <div class="board-placeholder" aria-hidden="true">
