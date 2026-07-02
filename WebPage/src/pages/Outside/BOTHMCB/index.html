@@ -33,6 +33,14 @@
 
     <section id="homeScreen" class="screen hidden">
       <div class="home-inner">
+        <div class="home-hud">
+          <div class="home-hud-left">
+            <div id="coinsDisplay" class="hud-chip">🪙 <span id="coinsValue">0</span></div>
+            <button id="openShopBtn" class="hud-btn">Shop</button>
+          </div>
+          <button id="openVaultInfoBtn" class="hud-chip hud-vault" aria-label="Infernal Vault">🔥 Infernal Vault <span id="vaultValue">0 / 50</span></button>
+        </div>
+
         <img src="icons/BOTHMCB_Title.png" alt="Blood on the Heavy Metal Chess Board" class="menu-title-img">
         <div class="profile-box">
           <h3>The Hellfire Codex of Victories, Precision, and Rampage</h3>
@@ -52,6 +60,36 @@
         
         <div class="version-info">
           <div>Ver: <span id="versionLabel">0.006</span></div>
+        </div>
+      </div>
+
+      <div id="shopPopup" class="popup hidden">
+        <div class="popup-inner">
+          <h2>Shop</h2>
+          <div class="shop-coins">🪙 <span id="shopCoinsValue">0</span></div>
+          <p class="shop-copy">Watching an advertisement grants Coins.</p>
+          <button id="watchAdBtn" class="btn-large">Watch Advertisement</button>
+          <hr style="border:1px solid #333; width:100%; margin:16px 0;">
+          <p class="shop-copy">Buy reserve moves for the Infernal Vault.</p>
+          <button id="buyVaultMoveBtn" class="btn-large">+1 Vault Move (25 Coins)</button>
+          <button id="closeShopBtn" class="btn-large" style="background:#333; margin-top:10px;">Close</button>
+        </div>
+      </div>
+
+      <div id="vaultInfoPopup" class="popup hidden">
+        <div class="popup-inner vault-info-inner">
+          <h2>Infernal Vault</h2>
+          <p>The Infernal Vault stores reserve moves that may save a failing streak.</p>
+          <p>Whenever you run out of moves, Hell offers a Pact.</p>
+          <p>A Pact lets you withdraw reserve moves and continue playing.</p>
+          <h3>Rules</h3>
+          <p>• Maximum Vault capacity: 50 moves.</p>
+          <p>• Vault moves are purchased with Coins.</p>
+          <p>• Maximum withdrawal per Pact: 5 moves.</p>
+          <p>• Maximum 3 Pacts per streak.</p>
+          <p>• Every Pact permanently lowers the highest possible grade for that card.</p>
+          <p>• Withdrawn moves are permanently removed from the Vault.</p>
+          <button id="closeVaultInfoBtn" class="btn-large" style="background:#333; margin-top:10px;">Close</button>
         </div>
       </div>
     </section>
@@ -84,6 +122,15 @@
 
         <button id="deleteDataBtn" class="btn-large" style="background:var(--accent);">Delete All Data</button>
         <button id="backToHomeBtn" class="btn-large" style="background:#333;">Back to Menu</button>
+      </div>
+
+      <div id="deleteDataPopup" class="popup hidden">
+        <div class="popup-inner delete-data-inner">
+          <h2>Delete Data</h2>
+          <p>Choose what you want to delete.</p>
+          <button id="deleteEverythingBtn" class="btn-large">Delete Everything</button>
+          <button id="deleteStatsOnlyBtn" class="btn-large" style="background:#333; margin-top:10px;">Delete Statistics Only</button>
+        </div>
       </div>
     </section>
 
@@ -136,6 +183,30 @@
             <h2 id="loseTitle">YOU LOSE!</h2>
             <p id="loseText">No moves left. Try another card.</p>
             <button id="loseOkBtn" class="btn-large">OK</button>
+          </div>
+        </div>
+
+        <div id="infernalPactPopup" class="popup hidden">
+          <div class="popup-inner infernal-pact-inner">
+            <h2>Infernal Pact</h2>
+            <p>You have exhausted your remaining moves.</p>
+            <p>Hell offers one final chance.</p>
+            <p>Choose how many moves you wish to bargain for.</p>
+
+            <div class="pact-stats">
+              <div>Remaining Pacts: <span id="pactRemainingDisplay">0 / 3</span></div>
+              <div>Vault: <span id="pactVaultDisplay">0 / 50</span></div>
+            </div>
+
+            <div class="pact-buttons">
+              <button id="pactAdd1Btn" class="btn-large">+1</button>
+              <button id="pactAdd2Btn" class="btn-large">+2</button>
+              <button id="pactAdd3Btn" class="btn-large">+3</button>
+              <button id="pactAdd4Btn" class="btn-large">+4</button>
+              <button id="pactAdd5Btn" class="btn-large">+5</button>
+            </div>
+
+            <button id="pactGiveUpBtn" class="btn-large" style="background:#333; margin-top:10px;">Give Up</button>
           </div>
         </div>
 

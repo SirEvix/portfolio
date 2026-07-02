@@ -49,6 +49,49 @@ body{
   width: 100%;
   max-width: 400px;
   padding: 20px;
+  position: relative;
+}
+
+.home-hud {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-chip {
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-btn {
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+.hud-vault {
+  cursor: pointer;
 }
 
 .menu-title-img {
@@ -501,6 +544,63 @@ body.game-mode {
   width:90%;
   max-width:350px;
   animation:popIn 0.25s ease;
+}
+
+.shop-coins {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.shop-copy {
+  color: var(--muted);
+}
+
+.vault-info-inner {
+  text-align: left;
+}
+
+.vault-info-inner h2,
+.vault-info-inner h3 {
+  text-align: center;
+}
+
+.infernal-pact-inner {
+  text-align: left;
+}
+
+.infernal-pact-inner h2 {
+  text-align: center;
+}
+
+.pact-stats {
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pact-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pact-buttons .btn-large {
+  padding: 10px 0;
+  font-size: 1rem;
+}
+
+.pact-buttons .btn-large:disabled {
+  background: #2a2a2a;
+  color: #7a7a7a;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.delete-data-inner {
+  display: flex;
+  flex-direction: column;
 }
 #winRank {
   margin: 0;

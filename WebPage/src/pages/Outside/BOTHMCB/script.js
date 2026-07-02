@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToHomeBtn = document.getElementById('backToHomeBtn');
   const versionLabel = document.getElementById('versionLabel');
   const deleteDataBtn = document.getElementById('deleteDataBtn');
+  const deleteDataPopup = document.getElementById('deleteDataPopup');
+  const deleteEverythingBtn = document.getElementById('deleteEverythingBtn');
+  const deleteStatsOnlyBtn = document.getElementById('deleteStatsOnlyBtn');
   
   const musicToggle = document.getElementById('musicToggle');
   const sfxToggle = document.getElementById('sfxToggle');
@@ -26,6 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const homeTotalCards = document.getElementById('homeTotalCards');
   const homeOverallAcc = document.getElementById('homeOverallAcc');
   const homeBestStreak = document.getElementById('homeBestStreak');
+  const coinsValue = document.getElementById('coinsValue');
+  const vaultValue = document.getElementById('vaultValue');
+  const openShopBtn = document.getElementById('openShopBtn');
+  const openVaultInfoBtn = document.getElementById('openVaultInfoBtn');
+  const shopPopup = document.getElementById('shopPopup');
+  const closeShopBtn = document.getElementById('closeShopBtn');
+  const watchAdBtn = document.getElementById('watchAdBtn');
+  const buyVaultMoveBtn = document.getElementById('buyVaultMoveBtn');
+  const shopCoinsValue = document.getElementById('shopCoinsValue');
+  const vaultInfoPopup = document.getElementById('vaultInfoPopup');
+  const closeVaultInfoBtn = document.getElementById('closeVaultInfoBtn');
   
   const installBtn = document.getElementById('installBtn');
   const overlay = document.getElementById('installOverlay');
@@ -52,6 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const winOkBtn = document.getElementById('winOkBtn');
   const losePopup = document.getElementById('losePopup');
   const loseOkBtn = document.getElementById('loseOkBtn');
+  const infernalPactPopup = document.getElementById('infernalPactPopup');
+  const pactRemainingDisplay = document.getElementById('pactRemainingDisplay');
+  const pactVaultDisplay = document.getElementById('pactVaultDisplay');
+  const pactAdd1Btn = document.getElementById('pactAdd1Btn');
+  const pactAdd2Btn = document.getElementById('pactAdd2Btn');
+  const pactAdd3Btn = document.getElementById('pactAdd3Btn');
+  const pactAdd4Btn = document.getElementById('pactAdd4Btn');
+  const pactAdd5Btn = document.getElementById('pactAdd5Btn');
+  const pactGiveUpBtn = document.getElementById('pactGiveUpBtn');
 
   // Testing override:
   // Set to `true` to force standalone/gameScreen, `false` to force installScreen,
@@ -68,6 +91,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let totalCards = 0;
   let totalAccuracySum = 0;
   let currentStreak = 0;
+  let coins = 0;
+  let vaultMoves = 0;
+
+  const VAULT_MAX_CAPACITY = 50;
+  const VAULT_MOVE_COST = 25;
+  const MAX_PACTS = 3;
+  const MAX_WITHDRAWAL = 5;
+
+  let currentVaultMoves = 0;
+  let remainingPacts = MAX_PACTS;
+  let currentPactNumber = 0;
+  let pactScoreDeclaredBonus = 0;
+  let lastRoundRank = null;
   
   let musicEnabled = true;
   let sfxEnabled = true;
@@ -176,6 +212,71 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       losePopup?.classList.add('hidden');
     }
 
+    function refreshInfernalPactUI() {
+      if (pactRemainingDisplay) pactRemainingDisplay.textContent = `${remainingPacts} / ${MAX_PACTS}`;
+      if (pactVaultDisplay) pactVaultDisplay.textContent = `${currentVaultMoves} / ${VAULT_MAX_CAPACITY}`;
+
+      const pactButtons = [
+        { btn: pactAdd1Btn, amount: 1 },
+        { btn: pactAdd2Btn, amount: 2 },
+        { btn: pactAdd3Btn, amount: 3 },
+        { btn: pactAdd4Btn, amount: 4 },
+        { btn: pactAdd5Btn, amount: 5 }
+      ];
+
+      const noPactsLeft = remainingPacts <= 0;
+      pactButtons.forEach(({ btn, amount }) => {
+        if (!btn) return;
+        btn.disabled = noPactsLeft || currentVaultMoves < amount;
+      });
+    }
+
+    function showInfernalPactPopup() {
+      refreshInfernalPactUI();
+      infernalPactPopup?.classList.remove('hidden');
+    }
+
+    function hideInfernalPactPopup() {
+      infernalPactPopup?.classList.add('hidden');
+    }
+
+    function applyInfernalPact(withdrawAmount) {
+      if (phase !== 'play') return;
+      if (remainingPacts <= 0) return;
+      if (withdrawAmount < 1 || withdrawAmount > MAX_WITHDRAWAL) return;
+      if (currentVaultMoves < withdrawAmount) return;
+
+      currentVaultMoves -= withdrawAmount;
+      vaultMoves = currentVaultMoves;
+      remainingPacts -= 1;
+      currentPactNumber += 1;
+      remainingMoves += withdrawAmount;
+
+      // Scoring support: accepted pacts inflate effective declared moves.
+      pactScoreDeclaredBonus += withdrawAmount + getPenalty();
+
+      if (bigMovesDisplay) bigMovesDisplay.textContent = Math.max(0, remainingMoves);
+
+      hideInfernalPactPopup();
+      refreshHUD();
+      saveData();
+    }
+
+    function triggerLoseOutcome() {
+      playLose();
+
+      beginNewStreak();
+      totalCards++;
+      // Loss acts as a 0 on accuracy, so totalAccuracySum stays perfectly intact
+      // but is divided by higher totalCards lowering the overall average.
+      saveData();
+      updateHomeStats();
+
+      phase = 'result';
+      pendingResult = 'lose';
+      showLosePopup();
+    }
+
     function finalizeWinRound() {
       goalGrid.classList.remove("goal-hover");
       bigMovesDisplay.classList.remove("big-moves-hover");
@@ -199,6 +300,8 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       winCount = 0;
       totalAccuracy = 0;
       lastRoundAccuracy = null;
+      lastRoundRank = null;
+      beginNewStreak();
       updateRunStatsDisplay();
 
       phase = 'setup';
@@ -245,6 +348,8 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       totalAccuracySum = data.totalAccuracySum || 0;
       currentStreak = data.currentStreak || 0;
       inProgressGame = data.inProgressGame || null;
+      coins = data.coins || 0;
+      vaultMoves = 0;
       
       musicEnabled = data.musicEnabled !== undefined ? data.musicEnabled : true;
       sfxEnabled = data.sfxEnabled !== undefined ? data.sfxEnabled : true;
@@ -254,6 +359,9 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       syncSettingsUI();
       applyMusicSettings();
       updateHomeStats();
+      syncVaultGameplayState();
+      resetPactState();
+        refreshHUD();
   }
 
   function saveData() {
@@ -262,6 +370,7 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
         totalCards,
         totalAccuracySum,
         currentStreak,
+        coins,
         musicEnabled,
         sfxEnabled,
         musicVolume,
@@ -277,9 +386,41 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       winCount = 0;
       totalAccuracy = 0;
       lastRoundAccuracy = null;
+      lastRoundRank = null;
+        coins = 0;
+        vaultMoves = 0;
+      syncVaultGameplayState();
+      resetPactState();
       loadData();
       alert("All data deleted!");
   }
+
+    function resetStatisticsOnly() {
+      longestStreak = 0;
+      totalCards = 0;
+      totalAccuracySum = 0;
+      currentStreak = 0;
+
+      inProgressGame = null;
+      winCount = 0;
+      totalAccuracy = 0;
+      lastRoundAccuracy = null;
+      lastRoundRank = null;
+
+      updateHomeStats();
+      updateRunStatsDisplay();
+      saveData();
+      refreshHUD();
+      alert("Statistics deleted!");
+    }
+
+    function showDeleteDataPopup() {
+      deleteDataPopup?.classList.remove('hidden');
+    }
+
+    function hideDeleteDataPopup() {
+      deleteDataPopup?.classList.add('hidden');
+    }
 
   function updateHomeStats() {
       const acc = totalCards > 0 ? Math.round((totalAccuracySum / totalCards) * 100) : 0;
@@ -289,6 +430,82 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       
       if (versionLabel) versionLabel.textContent = APP_VERSION;
   }
+
+      function refreshHUD() {
+        if (coinsValue) coinsValue.textContent = coins;
+        if (shopCoinsValue) shopCoinsValue.textContent = coins;
+        if (vaultValue) vaultValue.textContent = `${vaultMoves} / ${VAULT_MAX_CAPACITY}`;
+
+        if (buyVaultMoveBtn) {
+        const cannotAfford = coins < VAULT_MOVE_COST;
+        const isVaultFull = vaultMoves >= VAULT_MAX_CAPACITY;
+        buyVaultMoveBtn.disabled = cannotAfford || isVaultFull;
+        }
+
+        currentVaultMoves = vaultMoves;
+        refreshInfernalPactUI();
+      }
+
+      function addCoins(amount) {
+        coins += amount;
+        saveData();
+        refreshHUD();
+      }
+
+      function requestRewardedAd() {
+        if (window.AndroidBridge && typeof window.AndroidBridge.showRewardedAd === 'function') {
+          window.AndroidBridge.showRewardedAd();
+          return;
+        }
+        if (typeof window.showRewardedAd === 'function') {
+          window.showRewardedAd();
+          return;
+        }
+        window.onAdUnavailable?.();
+      }
+
+      window.onAdReward = function onAdReward() {
+        addCoins(250);
+      };
+
+      window.onAdUnavailable = function onAdUnavailable() {
+        alert('Ad is not available right now. Please try again in a moment.');
+      };
+
+      function buyVaultMove() {
+        if (coins < VAULT_MOVE_COST) return;
+        if (vaultMoves >= VAULT_MAX_CAPACITY) return;
+
+        coins -= VAULT_MOVE_COST;
+        vaultMoves += 1;
+        syncVaultGameplayState();
+
+        saveData();
+        refreshHUD();
+      }
+
+      function syncVaultGameplayState() {
+        currentVaultMoves = vaultMoves;
+      }
+
+      function resetPactState() {
+        remainingPacts = MAX_PACTS;
+        currentPactNumber = 0;
+      }
+
+      function beginNewStreak(options = {}) {
+        const { save = false, refresh = true } = options;
+
+        currentStreak = 0;
+        resetPactState();
+
+        if (refresh) {
+          refreshHUD();
+        }
+        if (save) {
+          saveData();
+        }
+      }
 
       function getRunOverallAccuracy() {
         return winCount > 0 ? totalAccuracy / winCount : 0;
@@ -302,7 +519,7 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
         }
 
         const overallAcc = getRunOverallAccuracy();
-        const lastRankSVG = getRankSVG(getRank(lastRoundAccuracy));
+        const lastRankSVG = getRankSVG(lastRoundRank || getRank(lastRoundAccuracy));
         const overallRankSVG = getRankSVG(getRank(overallAcc));
 
         winCounterDisplay.innerHTML = `
@@ -337,7 +554,10 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
           bidValue: bidInput ? bidInput.value : '10',
           winCount,
           totalAccuracy,
-          lastRoundAccuracy
+          lastRoundAccuracy,
+          currentVaultMoves,
+          remainingPacts,
+          currentPactNumber
         };
       }
 
@@ -361,6 +581,9 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
         winCount = savedGame.winCount || 0;
         totalAccuracy = savedGame.totalAccuracy || 0;
         lastRoundAccuracy = savedGame.lastRoundAccuracy ?? null;
+        currentVaultMoves = savedGame.currentVaultMoves ?? vaultMoves;
+        remainingPacts = savedGame.remainingPacts ?? MAX_PACTS;
+        currentPactNumber = savedGame.currentPactNumber ?? 0;
         selectedCell = null;
         possibleMoves = [];
         pendingResult = null;
@@ -394,6 +617,7 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
         winCount = 0;
         totalAccuracy = 0;
         lastRoundAccuracy = null;
+        lastRoundRank = null;
         selectedCell = null;
         possibleMoves = [];
         pendingResult = null;
@@ -881,6 +1105,10 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     phase = 'play';
     selectedCell = null;
     possibleMoves = [];
+    if (currentStreak === 0) {
+      beginNewStreak();
+    }
+    pactScoreDeclaredBonus = 0;
     resetRepeatStateTracking(board);
     
     // Update UI
@@ -963,6 +1191,37 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     if (acc >= 0.25) return "C";
     if (acc >= 0.10) return "D";
     return "F";
+  }
+
+  function getCurrentPactGradeCap() {
+    if (currentPactNumber >= 3) return 'C';
+    if (currentPactNumber === 2) return 'B';
+    if (currentPactNumber === 1) return 'A';
+    return null;
+  }
+
+  function applyGradeCap(rank, capRank) {
+    if (!capRank) return rank;
+
+    const order = ['SS', 'S', 'A', 'B', 'C', 'D', 'F'];
+    const rankIdx = order.indexOf(rank);
+    const capIdx = order.indexOf(capRank);
+    if (rankIdx === -1 || capIdx === -1) return rank;
+
+    return rankIdx < capIdx ? capRank : rank;
+  }
+
+  function getCoinsForRank(rank) {
+    const rewards = {
+      SS: 10,
+      S: 8,
+      A: 6,
+      B: 5,
+      C: 4,
+      D: 3,
+      F: 1
+    };
+    return rewards[rank] || 1;
   }
 
   let rankSvgIdCounter = 0;
@@ -1056,8 +1315,9 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     if (phase !== 'play') return null;
 
     if (arraysEqual(board, goal)){
-      const A = declaredMoves - remainingMoves;
-      const D = Math.max(1, declaredMoves);
+      const effectiveDeclaredMoves = declaredMoves + pactScoreDeclaredBonus;
+      const A = effectiveDeclaredMoves - remainingMoves;
+      const D = Math.max(1, effectiveDeclaredMoves);
       const rawAcc = A / D;
       const repeatPenaltyInput = repeatStateCount;
       const repeatPenaltyPoints = getRepeatStatePenaltyPoints();
@@ -1078,8 +1338,11 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
 
       const overallAcc = getRunOverallAccuracy();
 
-      const lastRank = getRank(acc);
+      const lastRank = applyGradeCap(getRank(acc), getCurrentPactGradeCap());
+      lastRoundRank = lastRank;
       const overallRank = getRank(overallAcc);
+
+      addCoins(getCoinsForRank(lastRank));
 
         phase = 'result';
         pendingResult = 'win';
@@ -1097,18 +1360,7 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
 
     }
     if (remainingMoves<=0){
-      playLose();
-      
-      currentStreak = 0;
-      totalCards++;
-      // Loss acts as a 0 on accuracy, so totalAccuracySum stays perfectly intact 
-      // but is divided by higher totalCards lowering the overall average.
-      saveData();
-      updateHomeStats();
-      
-      phase = 'result';
-      pendingResult = 'lose';
-      showLosePopup();
+      showInfernalPactPopup();
       return false;
     }
     return null;
@@ -1140,7 +1392,19 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
   generateRandomGoal();
   randomizeBoard();
 
-  if (deleteDataBtn) deleteDataBtn.addEventListener('click', resetData);
+  if (deleteDataBtn) deleteDataBtn.addEventListener('click', showDeleteDataPopup);
+  if (deleteEverythingBtn) {
+    deleteEverythingBtn.addEventListener('click', () => {
+      hideDeleteDataPopup();
+      resetData();
+    });
+  }
+  if (deleteStatsOnlyBtn) {
+    deleteStatsOnlyBtn.addEventListener('click', () => {
+      hideDeleteDataPopup();
+      resetStatisticsOnly();
+    });
+  }
   
   if (musicToggle) musicToggle.addEventListener('change', (e) => updateSettings('musicToggle', e.target.checked));
   if (quickMusicToggle) quickMusicToggle.addEventListener('change', (e) => updateSettings('musicToggle', e.target.checked));
@@ -1167,6 +1431,38 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
       showHome();
     });
   }
+  if (openShopBtn) {
+    openShopBtn.addEventListener('click', () => {
+      refreshHUD();
+      shopPopup?.classList.remove('hidden');
+    });
+  }
+  if (closeShopBtn) {
+    closeShopBtn.addEventListener('click', () => {
+      shopPopup?.classList.add('hidden');
+    });
+  }
+  if (watchAdBtn) {
+    watchAdBtn.addEventListener('click', () => {
+      requestRewardedAd();
+    });
+  }
+  if (buyVaultMoveBtn) {
+    buyVaultMoveBtn.addEventListener('click', () => {
+      buyVaultMove();
+    });
+  }
+  if (openVaultInfoBtn) {
+    openVaultInfoBtn.addEventListener('click', () => {
+      refreshHUD();
+      vaultInfoPopup?.classList.remove('hidden');
+    });
+  }
+  if (closeVaultInfoBtn) {
+    closeVaultInfoBtn.addEventListener('click', () => {
+      vaultInfoPopup?.classList.add('hidden');
+    });
+  }
   if (winOkBtn) {
     winOkBtn.addEventListener('click', () => {
       if (pendingResult === 'win') finalizeWinRound();
@@ -1175,6 +1471,17 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
   if (loseOkBtn) {
     loseOkBtn.addEventListener('click', () => {
       if (pendingResult === 'lose') finalizeLoseRound();
+    });
+  }
+  if (pactAdd1Btn) pactAdd1Btn.addEventListener('click', () => applyInfernalPact(1));
+  if (pactAdd2Btn) pactAdd2Btn.addEventListener('click', () => applyInfernalPact(2));
+  if (pactAdd3Btn) pactAdd3Btn.addEventListener('click', () => applyInfernalPact(3));
+  if (pactAdd4Btn) pactAdd4Btn.addEventListener('click', () => applyInfernalPact(4));
+  if (pactAdd5Btn) pactAdd5Btn.addEventListener('click', () => applyInfernalPact(5));
+  if (pactGiveUpBtn) {
+    pactGiveUpBtn.addEventListener('click', () => {
+      hideInfernalPactPopup();
+      triggerLoseOutcome();
     });
   }
 
@@ -1199,6 +1506,7 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     // Enter game screen in a stable setup state.
     hideWinPopup();
     hideLosePopup();
+    hideInfernalPactPopup();
     document.body.classList.add('game-mode'); // add game-mode class to body (this hides home background and shows game background)
     pendingResult = null;
 
