@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Example (uncomment to force game view while testing):
   // const TEST_FORCE_STANDALONE = true;
    const TEST_FORCE_STANDALONE = true; // Set to true to force standalone/gameScreen, false to force installScreen, or null to use real detection
-   const APP_VERSION = "0.006";
+   const APP_VERSION = "0.007";
   const SAVE_KEY = 'BOTHMCB_SAVE';
 
   // Data & Settings state
