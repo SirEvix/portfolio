@@ -35,18 +35,15 @@
       <div class="home-inner">
         <img src="icons/BOTHMCB_Title.png" alt="Blood on the Heavy Metal Chess Board" class="menu-title-img">
         <div class="profile-box">
-          <h3>Player Profile</h3>
-          <div class="profile-stat"><span>Cards Played:</span> <span id="homeTotalCards">0</span></div>
-          <div class="profile-stat"><span>Overall Accuracy:</span> <span id="homeOverallAcc">0%</span></div>
-          <div class="profile-stat"><span>Best Streak:</span> <span id="homeBestStreak">0</span></div>
+          <h3>The Hellfire Codex of Victories, Precision, and Rampage</h3>
+          <div class="profile-stat"><span>Battles Fought:</span> <span id="homeTotalCards">0</span></div>
+          <div class="profile-stat"><span>Warcraft Accuracy:</span> <span id="homeOverallAcc">0%</span></div>
+          <div class="profile-stat"><span>Unbroken Onslaught:</span> <span id="homeBestStreak">0</span></div>
         </div>
 
         <div class="menu-buttons">
           <button id="playGameBtn" class="menu-image-btn" aria-label="Start">
             <img src="icons/Start.png" alt="Start">
-          </button>
-          <button id="htpBtn" class="menu-image-btn" aria-label="How To Play">
-            <img src="icons/HTP.png" alt="How To Play">
           </button>
           <button id="settingsBtn" class="menu-image-btn" aria-label="Options">
             <img src="icons/OPT.png" alt="Options">
@@ -54,7 +51,7 @@
         </div>
         
         <div class="version-info">
-          <div>Ver: <span id="versionLabel">0.001</span></div>
+          <div>Ver: <span id="versionLabel">0.006</span></div>
         </div>
       </div>
     </section>
@@ -92,10 +89,6 @@
 
     <section id="gameScreen" class="screen hidden">
       <button id="quickSettingsBtn" style="position:absolute; top:8px; right:8px; z-index:9999; border:none; background:rgba(0,0,0,0.5); color:var(--text); font-size:1.4rem; padding:4px 8px; border-radius:8px; cursor:pointer;">⚙</button>
-      <header class="game-header">
-        <h2>Blood on the Heavy Metal Chess Board</h2>
-      </header>
-
       <div id="quickSettingsOverlay" class="overlay hidden" style="z-index:10000;">
         <div class="overlay-content">
           <h2 style="text-align:center; margin-bottom:16px;">Quick Settings</h2>
@@ -125,7 +118,7 @@
 
       <div class="game-body">
         
-        <div id="bigMovesDisplay" class="hidden" style="font-size:4rem; font-weight:bold; color:var(--accent); margin:10px 0;">0</div>
+        <div id="bigMovesDisplay" class="hidden big-moves-gradient" style="font-size:4rem; font-weight:bold; margin:10px 0;">0</div>
 
         <div id="goalGrid" aria-hidden="true"></div>
 

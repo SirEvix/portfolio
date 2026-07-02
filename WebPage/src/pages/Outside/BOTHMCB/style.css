@@ -9,9 +9,13 @@
   /* Board + cells */
   --board-border:#2222222c;
   --board-bg:linear-gradient(135deg,#15151559,#0e0e1059);
-  --board-shadow:0 8px 30px rgba(22, 0, 0, 0.6);
-  --cell-border:rgba(255,255,255,0.06);
-  --goal-cell-border:rgba(255,255,255,0.04);
+  --board-shadow:0 4px 20px rgb(85, 27, 9);
+  --goal-shadow:0px 0px 20px rgba(192, 175, 81, 0.815);
+  --cell-border-play:rgba(255,255,255,0.06);
+  --cell-border-goal:rgba(255,255,255,0.06);
+  --goal-board-border:rgba(94, 94, 94, 0.514);
+  --goal-cell-border:rgba(32, 32, 32, 0.801);
+  --goal-cell-border-shadow:0px 0px 5px rgba(197, 103, 40, 0.685);
   --selected-outline:rgba(0,122,255,0.75);
   --selected-bg:rgba(0,122,255,0.08);
   --allowed-bg:rgba(52,199,89,0.12);
@@ -174,20 +178,7 @@ body.game-mode {
 }
 
 /* Game screen */
-.game-header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  padding:12px 16px;
-  background:linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
-  backdrop-filter:blur(4px);
-}
-.game-header h2{
-  margin:0;
-  font-size:1rem;
-  text-align:center;
-}
+
 .game-body{
   display:flex;
   flex-direction:column;
@@ -199,6 +190,55 @@ body.game-mode {
   box-sizing:border-box;
   padding:50px 8px 12px 8px; /* leave space for header */
 }
+
+
+@keyframes bigMovesHover {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  10%  { transform: translate(1px, -1px) scale(1.005); }
+  20%  { transform: translate(-1px, 1px) scale(1.01); }
+  30%  { transform: translate(2px, -2px) scale(1.003); }
+  40%  { transform: translate(-2px, 2px) scale(1.008); }
+  50%  { transform: translate(0px, 0px) scale(1.015); }
+  60%  { transform: translate(1px, 2px) scale(1.005); }
+  70%  { transform: translate(-2px, -1px) scale(1.01); }
+  80%  { transform: translate(2px, 1px) scale(1.003); }
+  90%  { transform: translate(-1px, -2px) scale(1.008); }
+  91%  { transform: translate(-1px, -2px) scale(1.008); }
+  92%  { transform: translate(-8px, -8px) scale(1.01); }
+  93%  { transform: translate(-1px, -2px) scale(1.008); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.big-moves-hover {
+  animation: bigMovesHover 18s ease-in-out infinite;
+}
+
+@keyframes bigMovesJerk {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  20%  { transform: translate(-12px, 6px) scale(1.2); }
+  40%  { transform: translate(8px, -4px) scale(0.9); }
+  60%  { transform: translate(-6px, 3px) scale(1.1); }
+  80%  { transform: translate(3px, -2px) scale(1.03); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.big-moves-jerk {
+  animation: bigMovesJerk 0.20s cubic-bezier(.25,.90,.3,1.4);
+}
+
+.big-moves-gradient {
+  background: linear-gradient(
+    0deg,
+    #ffd700 0%,
+    #ffef9f 40%,
+    #ff3b3b 70%,
+    #b30000 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 
 /* Board wrapper */
 .board-placeholder{
@@ -218,6 +258,7 @@ body.game-mode {
   border-radius:8px;
   color:var(--muted);
   overflow:hidden;
+  /* 256.5, 17% */
 }
 .board-inner{
   font-size:0.95rem;
@@ -246,11 +287,15 @@ body.game-mode {
   aspect-ratio:1 / 1;
   margin:0 auto 8px auto;
   gap:4px;
+  box-shadow:var(--goal-shadow);
+  border-color:var(--goal-board-border);
+  border-style:solid;
 }
 
 /* Goal cells */
 .bm-goal-cell {
   border:1px solid var(--goal-cell-border);
+  box-shadow:var(--goal-cell-border-shadow);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -260,9 +305,26 @@ body.game-mode {
   color:var(--muted);
 }
 
+/* Subtle hover animation */
+@keyframes goalHover {
+  0%   { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+  20%  { transform: translate(1px, -5px) rotate(-0.2deg) scale(1.035); }
+  40%  { transform: translate(-2px, 1px) rotate(0.3deg) scale(1.005); }
+  60%  { transform: translate(3px, 2px) rotate(-0.3deg) scale(1.02); }
+  80%  { transform: translate(-10px, -1px) rotate(0.3deg) scale(1.01); }
+  100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+}
+
+.goal-hover {
+  animation: goalHover 20s ease-in-out infinite;
+}
+
+
+
+
 /* Board cells */
 .bm-cell {
-  border:1px solid var(--cell-border);
+  border:1px solid var(--cell-border-play);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -358,18 +420,49 @@ body.game-mode {
 }
 
 /* Profile Box */
+/* Profile Box */
 .profile-box {
-  background:rgba(19, 1, 1, 0.664);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:12px;
-  padding:16px;
-  margin-bottom:8px;
+  background: rgba(19, 1, 1, 0.664);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 8px;
 }
+
 .profile-box h3 {
-  margin:0 0 12px 0;
-  color:var(--accent);
-  font-size:1.1rem;
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: bold;
+
+  /* SOLID BASE COLOR (this is what removes transparency) */
+  color: #ffe100;
+
+  /* GRADIENT OVERLAY */
+  background: linear-gradient(
+    0deg,
+    #ffd700 0%,
+    #ffef9f 40%,
+    #ff3b3b 70%,
+    #b30000 100%
+  );
+
+  /* CLIP GRADIENT INTO TEXT */
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  /* Makes gradient visible — but base color keeps it solid */
+  -webkit-text-fill-color: rgba(255, 225, 0, 0.281);
+
+  /* STRONG METAL GLOW */
+  text-shadow:
+    0 0 4px #ffa6007c,
+    0 0 8px #cc9645,
+    0 0 12px rgb(255, 0, 0),
+    0 0 20px rgb(255, 0, 0),
+    0 0 30px rgb(255, 0, 0);
 }
+
+
 .profile-stat {
   display:flex;
   justify-content:space-between;

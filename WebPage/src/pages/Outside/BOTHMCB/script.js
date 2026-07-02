@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Example (uncomment to force game view while testing):
   // const TEST_FORCE_STANDALONE = true;
    const TEST_FORCE_STANDALONE = true; // Set to true to force standalone/gameScreen, false to force installScreen, or null to use real detection
-   const APP_VERSION = "0.005";
+   const APP_VERSION = "0.006";
   const SAVE_KEY = 'BOTHMCB_SAVE';
 
   // Data & Settings state
@@ -177,6 +177,8 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     }
 
     function finalizeWinRound() {
+      goalGrid.classList.remove("goal-hover");
+      bigMovesDisplay.classList.remove("big-moves-hover");
       phase = 'setup';
       setupPanel.classList.remove('hidden');
       setTimeout(() => {
@@ -192,6 +194,8 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     }
 
     function finalizeLoseRound() {
+      goalGrid.classList.remove("goal-hover");
+      bigMovesDisplay.classList.remove("big-moves-hover");
       winCount = 0;
       totalAccuracy = 0;
       lastRoundAccuracy = null;
@@ -864,6 +868,8 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
 
   // Play Initialization
   function startPlay(){
+    goalGrid.classList.add("goal-hover");
+    bigMovesDisplay.classList.add("big-moves-hover");
     if (Date.now() < gameInputUnlockAt) return;
     if (phase !== 'setup') return;
     const parsedBid = parseInt(bidInput.value, 10);
@@ -893,6 +899,12 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
     remainingMoves--;
     bigMovesDisplay.textContent = Math.max(0, remainingMoves);
     checkWinCondition();
+    bigMovesDisplay.classList.add("big-moves-jerk");
+
+    bigMovesDisplay.addEventListener("animationend", () => {
+        bigMovesDisplay.classList.remove("big-moves-jerk");
+    }, { once: true });
+
   }
 
   // Cell interactions
