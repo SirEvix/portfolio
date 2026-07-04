@@ -452,26 +452,6 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
         refreshHUD();
       }
 
-      function requestRewardedAd() {
-        if (window.AndroidBridge && typeof window.AndroidBridge.showRewardedAd === 'function') {
-          window.AndroidBridge.showRewardedAd();
-          return;
-        }
-        if (typeof window.showRewardedAd === 'function') {
-          window.showRewardedAd();
-          return;
-        }
-        window.onAdUnavailable?.();
-      }
-
-      window.onAdReward = function onAdReward() {
-        addCoins(250);
-      };
-
-      window.onAdUnavailable = function onAdUnavailable() {
-        alert('Ad is not available right now. Please try again in a moment.');
-      };
-
       function buyVaultMove() {
         if (coins < VAULT_MOVE_COST) return;
         if (vaultMoves >= VAULT_MAX_CAPACITY) return;
@@ -1444,7 +1424,7 @@ function showWinPopup(rank, accuracyPercent, cardScore, repeatCount = 0, repeatP
   }
   if (watchAdBtn) {
     watchAdBtn.addEventListener('click', () => {
-      requestRewardedAd();
+      addCoins(250);
     });
   }
   if (buyVaultMoveBtn) {
