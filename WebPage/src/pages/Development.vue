@@ -79,6 +79,7 @@
       <div style="margin: 20px 0;">
         <!-- Try a relative/static path first. If you serve the privacy.html from public or static hosting it should be available at /Outside/BoxDrop/privacy.html -->
         <button class="boxdrop-btn" @click="openBoxDrop">BoxDrop</button>
+        <button class="boxdrop-btn" @click="openBOTHMCB">BOTHMCB</button>
       </div>
     </div>
   </div>
@@ -109,6 +110,17 @@ export default {
       } catch (e) {
         // Fallback to a local file path for local development (may be blocked by browser depending on settings)
         const localPath = 'file:///C:/Users/sirev/Documents/GitHub/portfolio/src/pages/Outside/BoxDrop/privacy.html';
+        window.open(localPath, '_blank');
+      }
+    }
+    ,
+    openBOTHMCB() {
+      // Try to open the privacy page as a static relative path first (preferred for hosting).
+      const relative = '/Outside/BOTHMCB/privacy.html';
+      try {
+        window.open(relative, '_blank');
+      } catch (e) {
+        const localPath = 'file:///C:/Users/sirev/Documents/GitHub/portfolio/src/pages/Outside/BOTHMCB/privacy.html';
         window.open(localPath, '_blank');
       }
     }
