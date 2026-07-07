@@ -27,7 +27,7 @@ const fontUrl = '/assets/fonts/TimesNewRomanCyrBold.json'; // Use absolute path 
 const TEXTS = [
   { text: 'Florin Lica', position: { x: 5, y: 0.1, z: 10 }, rotation: { x: Math.PI / 2, y: Math.PI / 1, z: 4.7 }, size: 1 }, // Adjusted size
   { text: '(+34) 632 629 721', position: { x: 5.75, y: 0.1, z: 10 }, rotation: { x: Math.PI / 2, y: Math.PI / 1, z: 4.7 }, size: 0.4 }, // Adjusted size
-  { text: 'Florinlica@hotmai.com', position: { x: 6.5, y: 0.1, z: 10 }, rotation: { x: Math.PI / 2, y: Math.PI / 1, z: 4.7 }, size: 0.4 }, // Adjusted size
+  { text: 'Florinlica@hotmail.com', position: { x: 6.5, y: 0.1, z: 10 }, rotation: { x: Math.PI / 2, y: Math.PI / 1, z: 4.7 }, size: 0.4 }, // Adjusted size
   { text: "L'armentera, 17472 (Girona), Spain", position: { x: 7.25, y: 0.1, z: 10 }, rotation: { x: Math.PI / 2, y: Math.PI / 1, z: 4.7 }, size: 0.4 } // Adjusted size
 ];
 
