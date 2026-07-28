@@ -31,6 +31,7 @@ const TEXTS = [
   { text: "L'armentera, 17472 (Girona), Spain", position: { x: 7.25, y: 0.1, z: 10 }, rotation: { x: Math.PI / 2, y: Math.PI / 1, z: 4.7 }, size: 0.4 } // Adjusted size
 ];
 
+
 const TEXT_COLOR = ConstantColors.o.white;
 const TEXT_HEIGHT = 0.1;
 const TEXT_SCALE = { x: 1, y: 1, z: 0.0001 };
